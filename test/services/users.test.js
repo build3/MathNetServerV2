@@ -8,7 +8,7 @@ describe('users service', () => {
     beforeEach((done) => {
         // XXX: How to do this better?
         service.find().then((items) => {
-            items.data.forEach((item) => {
+            items.forEach((item) => {
                 service.remove(item._id);
             });
 
