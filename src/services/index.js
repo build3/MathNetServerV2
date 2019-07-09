@@ -1,11 +1,16 @@
-// eslint-disable-next-line no-unused-vars
-
 const users = require('./users/users.service.js');
 const classes = require('./classes/classes.service.js');
-const geogebra = require('./geogebra/geogebra.service.js');
+const groups = require('./groups/groups.service.js');
+const views = require('./views/views.service.js');
+const constructions = require('./constructions/constructions.service.js');
 
-module.exports = function (app) {
-  app.configure(users);
-  app.configure(classes);
-  app.configure(geogebra);
+module.exports = (app) => {
+    // Persistent
+    app.configure(users);
+    app.configure(classes);
+    app.configure(groups);
+    app.configure(constructions);
+
+    // Real-time
+    app.configure(views);
 };

@@ -1,47 +1,46 @@
-const log = require('./logger')
+const log = require('./logger');
 
-
-module.exports = app => {
+module.exports = (app) => {
     if (typeof app.channel !== 'function') {
         // If no real-time functionality has been configured just return.
-        return
+        return;
     }
 
-    app.on('connection', connection => {
+    app.on('connection', (connection) => {
         // On a new real-time connection, add it to the anonymous channel.
-        app.channel('anonymous').join(connection)
-        log.info('New anonymous connection')
-    })
+        app.channel('anonymous').join(connection);
+        log.info('New anonymous connection');
+    });
 
     app.on('login', (authResult, { connection }) => {
-        log.info('Attempting to login')
+        log.info('Attempting to login');
 
         // Connection can be undefined if there is no
         // real-time connection, e.g. when logging in via REST.
         if (connection) {
             // Obtain the logged in user from the connection
-            const user = connection.user
-            user.channels = user.channels || []
+            const { user } = connection;
+            user.channels = user.channels || [];
 
-            log.info('Connected user: ', connection.user)
+            log.info('Connected user: ', connection.user);
 
             // The connection is no longer anonymous, remove it
-            app.channel('anonymous').leave(connection)
+            app.channel('anonymous').leave(connection);
 
             // Add it to the authenticated user channel
-            app.channel('authenticated').join(connection)
+            app.channel('authenticated').join(connection);
 
             if (user.permissions.includes('admin')) {
-                app.channel('admins').join(connection)
-                user.channels.push('admins')
+                app.channel('admins').join(connection);
+                user.channels.push('admins');
             }
 
             if (user.permissions.includes('student')) {
-                app.channel('students').join(connection)
-                user.channels.push('students')
+                app.channel('students').join(connection);
+                user.channels.push('students');
             }
 
-            log.info('User channels', user.channels)
+            log.info('User channels', user.channels);
 
             // If the user has joined e.g. chat rooms
             // if (Array.isArray(user.channels)) {
@@ -53,10 +52,6 @@ module.exports = app => {
             // app.channel(`userIds/$(user.id}`).join(channel);
         }
     });
-
-    app.on('join', connection => {
-        log.info('User joining a group')
-    })
 
     // eslint-disable-next-line no-unused-vars
     app.publish((data, hook) => {
