@@ -1,6 +1,7 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
+const makeClient = require('./utils')
 
 describe('users service', () => {
     const service = app.service('users');
@@ -114,5 +115,136 @@ describe('users service', () => {
                 password: 'testtest',
             });
         });
+    });
+});
+
+describe('teacher end to end tests', function () {
+    const repository = app.service('users');
+    const host = app.get('host');
+    const port = app.get('port');
+    const username = 'franz';
+    const password = 'testtest';
+
+    let server;
+    let socket;
+    let requestedUser;
+    let service;
+
+    this.timeout(10000);
+
+    before(async () => {
+        server = app.listen(port);
+
+        server.on('listening', async () => {
+            console.log('Feathers application started on http://%s:%d', host, port);
+        });
+    });
+
+    beforeEach(async () => {
+        repository.options.multi = true;
+        await repository.remove(null);
+        repository.options.multi = false;
+
+        this.requestedUser = await repository.create({
+            username,
+            password,
+            permissions: ["admin"],
+        });
+
+        const { client, socket } = await makeClient(host, port, username, password);
+        this.service = client.service('users')
+
+    });
+
+    after(async () => {
+        server.close()
+    });
+
+    it('gets user data with single teacher', async () => {
+        const users = await this.service.find()
+
+        assert.equal(users.length, 1)
+    });
+
+    it('gets user data with single teacher and many students', async () => {
+        await repository.create({
+            username: "s1", password: "password", permissions: ["student"]
+        });
+        await repository.create({
+            username: "s2", password: "password", permissions: ["student"]
+        });
+        await repository.create({
+            username: "s3", password: "password", permissions: ["student"]
+        });
+
+        const users = await this.service.find()
+
+        assert.equal(users.length, 4)
+    });
+
+    it('changes requested user password', async () => {
+        await this.service.patch(
+            this.requestedUser._id, { password: "secretpassword" }
+        )
+
+        const updatedUser = await repository.get(this.requestedUser._id);
+
+        assert.notEqual(this.requestedUser.password, updatedUser.password)
+    });
+
+    it('changes password of other user', async () => {
+        const otherUser = await repository.create({
+            username: 'adam@kafka.eu',
+            password: 'secret',
+            permissions: ["student"],
+        });
+
+        await this.service.patch(
+            otherUser._id, { password: "password" }
+        )
+
+        const updatedUser = await repository.get(otherUser._id);
+
+        assert.equal(otherUser.password, updatedUser.password)
+    });
+
+    it('removes self account', async () => {
+        await this.service.remove(
+            this.requestedUser._id
+        )
+
+        const users = await repository.find({query:
+            {_id: this.requestedUser._id._id}
+        });
+
+        assert.equal(users.length, 1);
+    });
+
+    it('removes account of other user', async () => {
+        const otherUser = await repository.create({
+            username: 'adam@kafka.eu',
+            password: 'secret',
+            permissions: ["student"],
+        });
+
+        await this.service.remove(
+            otherUser._id
+        )
+
+        const users = await repository.find({query: {_id: otherUser._id}});
+
+        assert.equal(users.length, 1);
+    });
+
+    it('changes username', async () => {
+        await this.service.patch(
+            this.requestedUser._id,
+            {username: 'franz2@kafka.eu', password: 'other'}
+        )
+
+        const updatedUser = await repository.get(this.requestedUser._id._id);
+
+        assert.equal(this.requestedUser.username, updatedUser.username);
+        assert.notEqual(this.requestedUser.password, updatedUser.password);
     });
 });
