@@ -3,7 +3,16 @@ module.exports = (app) => {
     const { Schema } = client;
 
     const constructions = new Schema({
+        name: {
+            type: String, required: true, unique: true,
+        },
+        // XML content of the construction. Imported
+        // and exported by GeoGebra applet.
         xml: {
+            type: String, required: true,
+        },
+        // Owner of the construction.
+        teacher: {
             type: String, required: true,
         },
     }, {
