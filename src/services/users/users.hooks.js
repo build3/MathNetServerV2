@@ -4,22 +4,20 @@ const { hashPassword, protect } = require('@feathersjs/authentication-local').ho
 
 const checkPermissions = require('feathers-permissions');
 
-const { adminOrOwner, owner, preventChangesIfNotOwner } = require('../utils.hooks')
-
-const { preventChanges } = require('feathers-hooks-common');
+const { adminOrOwner, owner, preventChangesIfNotOwner } = require('../utils.hooks');
 
 module.exports = {
     before: {
         all: [],
-        find: [authenticate('jwt'), checkPermissions({roles: ['admin']})],
+        find: [authenticate('jwt'), checkPermissions({ roles: ['admin'] })],
         get: [authenticate('jwt'), adminOrOwner()],
         create: [hashPassword()],
         update: [hashPassword(), authenticate('jwt'), owner()],
         patch: [
             hashPassword(), authenticate('jwt'),
-            adminOrOwner(), preventChangesIfNotOwner('password')
+            adminOrOwner(), preventChangesIfNotOwner('password'),
         ],
-        remove: [authenticate('jwt'), checkPermissions({roles: []})],
+        remove: [authenticate('jwt'), checkPermissions({ roles: [] })],
     },
 
     after: {

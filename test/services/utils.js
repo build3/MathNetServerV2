@@ -1,6 +1,7 @@
-const app = require('../../src/app');
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
+
+const app = require('../../src/app');
 
 /**
  * Create test client for e2e tests.
@@ -25,8 +26,27 @@ const io = require('socket.io-client');
  *     const { client, socket } = await makeClient(host, port, username, password);
  * });
  */
-module.exports = async function makeClient({username, password, host, port} = {}) {
-    const authenticate = !(username == undefined && password == undefined)
+
+function localStorage() {
+    const store = {};
+
+    return {
+        setItem(key, value) {
+            store[key] = value;
+        },
+        getItem(key) {
+            return store[key];
+        },
+        removeItem(key) {
+            delete store[key];
+        },
+    };
+}
+
+module.exports = async function makeClient({
+    username, password, host, port,
+} = {}) {
+    const authenticate = !(username === undefined && password === undefined);
     const client = feathersClient();
     host = host || app.get('host');
     port = port || app.get('port');
@@ -35,14 +55,14 @@ module.exports = async function makeClient({username, password, host, port} = {}
         transports: ['websocket'],
         forceNew: true,
         reconnection: false,
-        extraHeaders: {}
+        extraHeaders: {},
     });
 
     client.configure(feathersClient.socketio(socket));
 
     if (authenticate) {
         client.configure(feathersClient.authentication({
-            storage: localStorage()
+            storage: localStorage(),
         }));
 
         await client.authenticate({
@@ -53,20 +73,4 @@ module.exports = async function makeClient({username, password, host, port} = {}
     }
 
     return { client, socket };
-}
-
-function localStorage () {
-    const store = {};
-
-    return {
-        setItem (key, value) {
-            store[key] = value;
-        },
-        getItem (key) {
-            return store[key];
-        },
-        removeItem (key) {
-            delete store[key];
-        }
-    };
-}
+};
