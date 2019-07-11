@@ -11,10 +11,6 @@ module.exports = (app) => {
         xml: {
             type: String, required: true,
         },
-        // Owner of the construction.
-        teacher: {
-            type: String, required: true,
-        },
     }, {
         timestamps: true,
     });

@@ -24,7 +24,7 @@ const io = require('socket.io-client');
  *     const { client, socket } = await makeClient(host, port, username, password);
  * });
  */
-module.exports = async function makeClient(host, port, username, password) {
+async function makeClient(host, port, username, password) {
     const client = feathersClient();
 
     const socket = io(`http://${host}:${port}`, {
@@ -62,4 +62,17 @@ function localStorage () {
             delete store[key];
         }
     };
+}
+
+async function clearAll(...services) {
+    services.forEach(async (service) => {
+        service.options.multi = true;
+        await service.remove(null);
+        service.options.multi = false;
+    });
+}
+
+module.exports = {
+    makeClient,
+    clearAll
 }
