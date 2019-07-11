@@ -1,5 +1,6 @@
 const assert = require('assert');
 const app = require('../../src/app');
+const errors = require('@feathersjs/errors');
 const log = require('../../src/logger');
 const makeClient = require('./utils')
 
@@ -151,7 +152,9 @@ describe('teacher end to end tests', function () {
             permissions: ["admin"],
         });
 
-        const { client, socket } = await makeClient(host, port, username, password);
+        const { client, socket } = await makeClient(
+            {username: username, password: password}
+        );
         this.service = client.service('users')
 
     });
@@ -246,5 +249,186 @@ describe('teacher end to end tests', function () {
 
         assert.equal(this.requestedUser.username, updatedUser.username);
         assert.notEqual(this.requestedUser.password, updatedUser.password);
+    });
+});
+
+describe('unathenticated user end to end tests', function () {
+    const repository = app.service('users');
+    const host = app.get('host');
+    const port = app.get('port');
+
+    let server;
+    let service;
+
+    this.timeout(10000);
+
+    before(async () => {
+        server = app.listen(port);
+
+        server.on('listening', async () => {
+            console.log('Feathers application started on http://%s:%d', host, port);
+        });
+    });
+
+    beforeEach(async () => {
+        repository.options.multi = true;
+        await repository.remove(null);
+        repository.options.multi = false;
+
+        const { client, socket } = await makeClient();
+        this.service = client.service('users')
+
+    });
+
+    after(async () => {
+        server.close()
+    });
+
+    it('creates an account', async () => {
+        const response = await this.service.create({
+            username: 'franz',
+            password: 'test',
+            permissions: ['admin']
+        })
+
+        const user = await repository.get(response._id);
+
+        assert.equal(response.password, undefined)
+        assert.equal(user.username, response.username)
+        assert.deepEqual(user.permissions, response.permissions)
+    });
+
+    it('lists users', async () => {
+        await assert.rejects(async () => {
+            await this.service.find()
+        })
+    });
+
+    it('updates user', async () => {
+        const user = await repository.create({
+            username: 'adam@kafka.eu',
+            password: 'secret',
+            permissions: ["student"],
+        });
+
+        await assert.rejects(async () => {
+            await this.service.patch(user._id, {username: 'franz'})
+        })
+    });
+});
+
+describe('student end to end tests', function () {
+    const repository = app.service('users');
+    const host = app.get('host');
+    const port = app.get('port');
+    const username = 'franz';
+    const password = 'testtest';
+
+    let server;
+    let socket;
+    let requestedUser;
+    let service;
+
+    this.timeout(10000);
+
+    before(async () => {
+        server = app.listen(port);
+
+        server.on('listening', async () => {
+            console.log('Feathers application started on http://%s:%d', host, port);
+        });
+    });
+
+    beforeEach(async () => {
+        repository.options.multi = true;
+        await repository.remove(null);
+        repository.options.multi = false;
+
+        this.requestedUser = await repository.create({
+            username,
+            password,
+            permissions: ["student"],
+        });
+
+        const { client, socket } = await makeClient(
+            {username: username, password: password}
+        );
+        this.service = client.service('users')
+
+    });
+
+    after(async () => {
+        server.close()
+    });
+
+    it('lists users', async () => {
+        await repository.create({
+            username: "teacher", password: "password", permissions: ["admin"]
+        });
+
+        await assert.rejects(async () => {
+            await this.service.find()
+        })
+    });
+
+    it('gets self account', async () => {
+        const user = await this.service.get(this.requestedUser._id)
+
+        assert.equal(this.requestedUser.username, user.username)
+    });
+
+    it('gets accounts of other user', async () => {
+        const user = await repository.create({
+            username: 'adam',
+            password: 'test',
+            permissions: ['student']
+        })
+
+        await assert.rejects(async () => {
+            await this.service.get(user._id)
+        })
+    });
+
+    it('removes self account', async () => {
+        await this.service.remove(
+            this.requestedUser._id
+        )
+
+        const users = await repository.find({query:
+            {_id: this.requestedUser._id._id}
+        });
+
+        assert.equal(users.length, 1);
+    });
+
+    it('removes account of other user', async () => {
+        const otherUser = await repository.create({
+            username: 'adam@kafka.eu',
+            password: 'secret',
+            permissions: ["student"],
+        });
+
+        await this.service.remove(
+            otherUser._id
+        )
+
+        const users = await repository.find({query: {_id: otherUser._id}});
+
+        assert.equal(users.length, 1);
+    });
+
+    it('changes username to existing one', async () => {
+        await repository.create({
+            username: 'adam@kafka.eu',
+            password: 'secret',
+            permissions: ["student"],
+        });
+
+        await assert.rejects(async () => {
+            await this.service.patch(
+                this.requestedUser._id,
+                {username: 'adam@kafka.eu'}
+            )
+        })
     });
 });

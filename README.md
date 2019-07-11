@@ -27,6 +27,9 @@ Getting up and running is as easy as 1, 2, 3.
 
 ## Testing
 
+First install mocha globally with command `npm install -g mocha`. Then run
+`make --always-make test`
+
 Simply run `npm test` and all your tests in the `test/` directory will be run.
 
 ## Scaffolding
