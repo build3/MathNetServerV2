@@ -25,8 +25,8 @@ const io = require('socket.io-client');
  *     const { client, socket } = await makeClient(host, port, username, password);
  * });
  */
-module.exports = async function makeClient({username, password, host, port}) {
-    const authenticate = !(username == undefined && password == undefined)    
+module.exports = async function makeClient({username, password, host, port} = {}) {
+    const authenticate = !(username == undefined && password == undefined)
     const client = feathersClient();
     host = host || app.get('host');
     port = port || app.get('port');

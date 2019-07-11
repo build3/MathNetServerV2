@@ -90,11 +90,13 @@ describe('users service', () => {
             password: 'testtest',
         });
 
-        await service.patch(user._id, { password: 'testtest2' });
+        await assert.rejects(async () => {
+            await service.patch(user._id, { password: 'testtest2' });
+        });
 
         const updatedUser = await service.find(user._id);
 
-        assert.notEqual(user.password, updatedUser[0].password)
+        assert.equal(user.password, updatedUser[0].password)
     });
 
     it('fails authorization without a token', async () => {
@@ -202,9 +204,11 @@ describe('teacher end to end tests', function () {
             permissions: ["student"],
         });
 
-        await this.service.patch(
-            otherUser._id, { password: "password" }
-        )
+        await assert.rejects(async () => {
+            await this.service.patch(
+                otherUser._id, { password: "password" }
+            )
+        })
 
         const updatedUser = await repository.get(otherUser._id);
 
@@ -212,8 +216,8 @@ describe('teacher end to end tests', function () {
     });
 
     it('removes self account', async () => {
-        await this.service.remove(
-            this.requestedUser._id
+        await assert.rejects(async () =>
+            await this.service.remove(this.requestedUser._id)
         )
 
         const users = await repository.find({query:
@@ -230,9 +234,9 @@ describe('teacher end to end tests', function () {
             permissions: ["student"],
         });
 
-        await this.service.remove(
-            otherUser._id
-        )
+        await assert.rejects(async () => {
+            await this.service.remove(otherUser._id)
+        })
 
         const users = await repository.find({query: {_id: otherUser._id}});
 
@@ -242,13 +246,12 @@ describe('teacher end to end tests', function () {
     it('changes username', async () => {
         await this.service.patch(
             this.requestedUser._id,
-            {username: 'franz2@kafka.eu', password: 'other'}
+            {username: 'franz2@kafka.eu'}
         )
 
         const updatedUser = await repository.get(this.requestedUser._id._id);
 
-        assert.equal(this.requestedUser.username, updatedUser.username);
-        assert.notEqual(this.requestedUser.password, updatedUser.password);
+        assert.equal(updatedUser.username, 'franz2@kafka.eu');
     });
 });
 
@@ -390,9 +393,9 @@ describe('student end to end tests', function () {
     });
 
     it('removes self account', async () => {
-        await this.service.remove(
-            this.requestedUser._id
-        )
+        await assert.rejects(async () => {
+            await this.service.remove(this.requestedUser._id)
+        })
 
         const users = await repository.find({query:
             {_id: this.requestedUser._id._id}
@@ -408,9 +411,9 @@ describe('student end to end tests', function () {
             permissions: ["student"],
         });
 
-        await this.service.remove(
-            otherUser._id
-        )
+        await assert.rejects(async () => {
+            await this.service.remove(otherUser._id)
+        })
 
         const users = await repository.find({query: {_id: otherUser._id}});
 
