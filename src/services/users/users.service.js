@@ -4,7 +4,7 @@ const hooks = require('./users.hooks');
 
 module.exports = (app) => {
     const Model = createModel(app);
-    const options = { Model };
+    const options = { Model, id: 'username' };
 
     // Initialize our service with any options it requires.
     app.use('/users', createService(options));

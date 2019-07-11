@@ -75,13 +75,13 @@ describe('users service', () => {
         });
 
         // Check is user is in db.
-        assert.equal((await service.find(user._id)).length, 1);
+        assert.equal((await service.find(user.username)).length, 1);
 
         // Remove user.
-        await service.remove(user._id);
+        await service.remove(user.username);
 
         // Check is user has been removed successfully.
-        assert.equal((await service.find(user._id)).length, 0);
+        assert.equal((await service.find(user.username)).length, 0);
     });
 
     it('changes password', async () => {
@@ -91,10 +91,10 @@ describe('users service', () => {
         });
 
         await assert.rejects(async () => {
-            await service.patch(user._id, { password: 'testtest2' });
+            await service.patch(user.username, { password: 'testtest2' });
         });
 
-        const updatedUser = await service.find(user._id);
+        const updatedUser = await service.find(user.username);
 
         assert.equal(user.password, updatedUser[0].password);
     });
@@ -183,10 +183,10 @@ describe('teacher end to end tests', function () {
 
     it('changes requested user password', async () => {
         await this.service.patch(
-            this.requestedUser._id, { password: 'secretpassword' },
+            this.requestedUser.username, { password: 'secretpassword' },
         );
 
-        const updatedUser = await repository.get(this.requestedUser._id);
+        const updatedUser = await repository.get(this.requestedUser.username);
 
         assert.notEqual(this.requestedUser.password, updatedUser.password);
     });
@@ -200,22 +200,22 @@ describe('teacher end to end tests', function () {
 
         await assert.rejects(async () => {
             await this.service.patch(
-                otherUser._id, { password: 'password' },
+                otherUser.username, { password: 'password' },
             );
         });
 
-        const updatedUser = await repository.get(otherUser._id);
+        const updatedUser = await repository.get(otherUser.username);
 
         assert.equal(otherUser.password, updatedUser.password);
     });
 
     it('removes self account', async () => {
         await assert.rejects(async () =>
-            await this.service.remove(this.requestedUser._id),
+            await this.service.remove(this.requestedUser.username),
         );
 
         const users = await repository.find({
-            query: { _id: this.requestedUser._id._id },
+            query: { username: this.requestedUser.username },
         });
 
         assert.equal(users.length, 1);
@@ -229,24 +229,24 @@ describe('teacher end to end tests', function () {
         });
 
         await assert.rejects(async () => {
-            await this.service.remove(otherUser._id);
+            await this.service.remove(otherUser.username);
         });
 
-        const users = await repository.find({ query: { _id: otherUser._id } });
+        const users = await repository.find({ query: { username: otherUser.username } });
 
         assert.equal(users.length, 1);
     });
 
-    it('changes username', async () => {
-        await this.service.patch(
-            this.requestedUser._id,
-            { username: 'franz2@kafka.eu' },
-        );
-
-        const updatedUser = await repository.get(this.requestedUser._id._id);
-
-        assert.equal(updatedUser.username, 'franz2@kafka.eu');
-    });
+    // it('changes username', async () => {
+    //     await this.service.patch(
+    //         this.requestedUser.username,
+    //         { username: 'franz2@kafka.eu' },
+    //     );
+    //
+    //     const updatedUser = await repository.get(this.requestedUser.username);
+    //
+    //     assert.equal(updatedUser.username, 'franz2@kafka.eu');
+    // });
 });
 
 describe('unathenticated user end to end tests', function () {
@@ -286,7 +286,7 @@ describe('unathenticated user end to end tests', function () {
             permissions: ['admin'],
         });
 
-        const user = await repository.get(response._id);
+        const user = await repository.get(response.username);
 
         assert.equal(response.password, undefined);
         assert.equal(user.username, response.username);
@@ -307,7 +307,7 @@ describe('unathenticated user end to end tests', function () {
         });
 
         await assert.rejects(async () => {
-            await this.service.patch(user._id, { username: 'franz' });
+            await this.service.patch(user.username, { username: 'franz' });
         });
     });
 });
@@ -361,7 +361,7 @@ describe('student end to end tests', function () {
     });
 
     it('gets self account', async () => {
-        const user = await this.service.get(this.requestedUser._id);
+        const user = await this.service.get(this.requestedUser.username);
 
         assert.equal(this.requestedUser.username, user.username);
     });
@@ -374,17 +374,17 @@ describe('student end to end tests', function () {
         });
 
         await assert.rejects(async () => {
-            await this.service.get(user._id);
+            await this.service.get(user.username);
         });
     });
 
     it('removes self account', async () => {
         await assert.rejects(async () => {
-            await this.service.remove(this.requestedUser._id);
+            await this.service.remove(this.requestedUser.username);
         });
 
         const users = await repository.find({
-            query: { _id: this.requestedUser._id._id },
+            query: { username: this.requestedUser.username },
         });
 
         assert.equal(users.length, 1);
@@ -398,26 +398,26 @@ describe('student end to end tests', function () {
         });
 
         await assert.rejects(async () => {
-            await this.service.remove(otherUser._id);
+            await this.service.remove(otherUser.username);
         });
 
-        const users = await repository.find({ query: { _id: otherUser._id } });
+        const users = await repository.find({ query: { username: otherUser.username } });
 
         assert.equal(users.length, 1);
     });
 
-    it('changes username to existing one', async () => {
-        await repository.create({
-            username: 'adam@kafka.eu',
-            password: 'secret',
-            permissions: ['student'],
-        });
-
-        await assert.rejects(async () => {
-            await this.service.patch(
-                this.requestedUser._id,
-                { username: 'adam@kafka.eu' },
-            );
-        });
-    });
+    // it('changes username to existing one', async () => {
+    //     await repository.create({
+    //         username: 'adam@kafka.eu',
+    //         password: 'secret',
+    //         permissions: ['student'],
+    //     });
+    //
+    //     await assert.rejects(async () => {
+    //         await this.service.patch(
+    //             this.requestedUser.username,
+    //             { username: 'adam@kafka.eu' },
+    //         );
+    //     });
+    // });
 });

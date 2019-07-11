@@ -6,7 +6,7 @@ function adminOrOwner() {
         roles(context) {
             const { user } = context.params;
             if (user !== undefined) {
-                if (user._id.equals(context.arguments[0])) {
+                if (user.username == context.arguments[0]) {
                     return ['admin', 'student'];
                 }
             }
@@ -20,7 +20,7 @@ function owner() {
     return function (context) {
         const { user } = context.params;
         if (user !== undefined) {
-            if (user._id.equals(context.arguments[0])) {
+            if (user.username == context.arguments[0]) {
                 return context;
             }
         }
@@ -33,7 +33,7 @@ function preventChangesIfNotOwner(field) {
     return function (context) {
         const { user } = context.params;
         if (user !== undefined) {
-            if (user._id.equals(context.arguments[0])) {
+            if (user.username == context.arguments[0]) {
                 return context;
             }
         }
