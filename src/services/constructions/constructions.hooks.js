@@ -1,13 +1,16 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 
+const checkOwner = require('./check_owner');
+const assignToOwner = require('./assign_to_owner');
+
 module.exports = {
     before: {
         all: [authenticate('jwt')],
         find: [],
-        get: [],
+        get: [checkOwner],
         create: [],
-        update: [],
-        patch: [],
+        update: [checkOwner],
+        patch: [checkOwner],
         remove: [],
     },
 
@@ -15,7 +18,7 @@ module.exports = {
         all: [],
         find: [],
         get: [],
-        create: [],
+        create: [assignToOwner],
         update: [],
         patch: [],
         remove: [],

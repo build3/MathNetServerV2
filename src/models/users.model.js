@@ -12,6 +12,9 @@ module.exports = (app) => {
         permissions: {
             type: [String], required: true,
         },
+        constructions: {
+            type: [String], required: true
+        }
     }, {
         timestamps: true,
     });
