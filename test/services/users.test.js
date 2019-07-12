@@ -2,17 +2,13 @@ const assert = require('assert');
 const app = require('../../src/app');
 const errors = require('@feathersjs/errors');
 const log = require('../../src/logger');
-const { makeClient } = require('../utils');
+const { clearAll, makeClient } = require('../utils');
 
 describe('users service', () => {
     const service = app.service('users');
 
     beforeEach(async () => {
-        service.options.multi = true;
-
-        await service.remove(null);
-
-        service.options.multi = false;
+        await clearAll(service);
     });
 
     it('registered the service', () => {
@@ -136,14 +132,13 @@ describe('teacher end to end tests', function () {
         server = app.listen(port);
 
         server.on('listening', async () => {
-            log('Feathers application started on http://%s:%d', host, port);
+            log.info('Feathers application started on http://%s:%d', host, port);
         });
+        await clearAll(repository);
     });
 
     beforeEach(async () => {
-        repository.options.multi = true;
-        await repository.remove(null);
-        repository.options.multi = false;
+        clearAll(repository);
 
         this.requestedUser = await repository.create({
             username,
@@ -256,9 +251,7 @@ describe('unathenticated user end to end tests', function () {
     });
 
     beforeEach(async () => {
-        repository.options.multi = true;
-        await repository.remove(null);
-        repository.options.multi = false;
+        await clearAll(repository);
 
         const { client, _ } = await makeClient();
         this.service = client.service('users');
@@ -321,9 +314,7 @@ describe('student end to end tests', function () {
     });
 
     beforeEach(async () => {
-        repository.options.multi = true;
-        await repository.remove(null);
-        repository.options.multi = false;
+        await clearAll(repository)
 
         this.requestedUser = await repository.create({
             username,
