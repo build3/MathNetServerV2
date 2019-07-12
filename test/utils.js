@@ -1,7 +1,7 @@
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
 
-const app = require('../../src/app');
+const app = require('../src/app');
 
 /**
  * Create test client for e2e tests.
@@ -43,7 +43,7 @@ function localStorage() {
     };
 }
 
-module.exports = async function makeClient({
+async function makeClient({
     username, password, host, port,
 } = {}) {
     const authenticate = !(username === undefined && password === undefined);
@@ -74,3 +74,16 @@ module.exports = async function makeClient({
 
     return { client, socket };
 };
+
+async function clearAll(...services) {
+    services.forEach(async (service) => {
+        service.options.multi = true;
+        await service.remove(null);
+        service.options.multi = false;
+    });
+}
+
+module.exports = {
+    makeClient,
+    clearAll
+}

@@ -2,7 +2,7 @@ const assert = require('assert');
 const app = require('../../src/app');
 const errors = require('@feathersjs/errors');
 const log = require('../../src/logger');
-const makeClient = require('./utils');
+const { makeClient } = require('../utils');
 
 describe('users service', () => {
     const service = app.service('users');
