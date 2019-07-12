@@ -3,6 +3,7 @@ USERS_PATH=test/services/users.test.js
 GROUPS_PATH=test/services/groups.test.js
 
 test:
+	$(MOCHA) $(GROUPS_PATH) -g "groups management by teacher" &&\
 	$(MOCHA) $(GROUPS_PATH) -g "groups management by student" &&\
 	$(MOCHA) $(GROUPS_PATH) -g "groups management by unauthorized user" &&\
 	$(MOCHA) $(USERS_PATH) -g "users service" &&\
