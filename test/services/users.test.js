@@ -186,7 +186,7 @@ describe('teacher end to end tests', function () {
         assert.notEqual(this.requestedUser.password, updatedUser.password);
     });
 
-    it('changes password of other user', async () => {
+    it('does not change password of other user', async () => {
         const otherUser = await repository.create({
             username: 'adam@kafka.eu',
             password: 'secret',
@@ -204,7 +204,7 @@ describe('teacher end to end tests', function () {
         assert.equal(otherUser.password, updatedUser.password);
     });
 
-    it('removes self account', async () => {
+    it('removes own account', async () => {
         await assert.rejects(async () =>
             await this.service.remove(this.requestedUser.username),
         );
@@ -216,7 +216,7 @@ describe('teacher end to end tests', function () {
         assert.equal(users.length, 1);
     });
 
-    it('removes account of other user', async () => {
+    it('does not remove account of other user', async () => {
         const otherUser = await repository.create({
             username: 'adam@kafka.eu',
             password: 'secret',
@@ -340,7 +340,7 @@ describe('student end to end tests', function () {
         });
     });
 
-    it('gets self account', async () => {
+    it('gets own account', async () => {
         const user = await this.service.get(this.requestedUser.username);
 
         assert.equal(this.requestedUser.username, user.username);
@@ -358,7 +358,7 @@ describe('student end to end tests', function () {
         });
     });
 
-    it('removes self account', async () => {
+    it('removes own account', async () => {
         await assert.rejects(async () => {
             await this.service.remove(this.requestedUser.username);
         });
