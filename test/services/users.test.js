@@ -236,17 +236,6 @@ describe('teacher end to end tests', function () {
 
         assert.equal(users.length, 1);
     });
-
-    // it('changes username', async () => {
-    //     await this.service.patch(
-    //         this.requestedUser.username,
-    //         { username: 'franz2@kafka.eu' },
-    //     );
-    //
-    //     const updatedUser = await repository.get(this.requestedUser.username);
-    //
-    //     assert.equal(updatedUser.username, 'franz2@kafka.eu');
-    // });
 });
 
 describe('unathenticated user end to end tests', function () {
@@ -405,19 +394,4 @@ describe('student end to end tests', function () {
 
         assert.equal(users.length, 1);
     });
-
-    // it('changes username to existing one', async () => {
-    //     await repository.create({
-    //         username: 'adam@kafka.eu',
-    //         password: 'secret',
-    //         permissions: ['student'],
-    //     });
-    //
-    //     await assert.rejects(async () => {
-    //         await this.service.patch(
-    //             this.requestedUser.username,
-    //             { username: 'adam@kafka.eu' },
-    //         );
-    //     });
-    // });
 });
