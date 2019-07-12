@@ -10,7 +10,7 @@ module.exports = {
     before: {
         all: [],
         find: [authenticate('jwt'), checkPermissions({ roles: ['admin'] })],
-        get: [authenticate('jwt'), adminOrOwner()],
+        get: [authenticate('jwt'), checkAdminOrOwner()],
         create: [hashPassword()],
         update: [hashPassword(), authenticate('jwt'), checkOwner()],
         patch: [
