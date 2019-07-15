@@ -9,7 +9,6 @@ function isOwner(context) {
 
 /**
  * Checks wheter requested user is admin or owns resource.
- * WARNING: So far it works only for `users` endpoint.
  */
 function checkAdminOrOwner() {
     return checkPermissions({
@@ -25,7 +24,6 @@ function checkAdminOrOwner() {
 
 /**
  * Checks wheter requested user owns resource.
- * WARNING: So far it works only for `users` endpoint.
  */
 function checkOwner() {
     return function (context) {
@@ -37,11 +35,9 @@ function checkOwner() {
     };
 }
 
-
 /**
  * Prevents to update `field` of resource, unless requested user is
  * an owner of the resource.
- * WARNING: So far it works only for `users` endpoint.
  */
 function preventChangesIfNotOwner(field) {
     return function (context) {

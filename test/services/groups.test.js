@@ -28,7 +28,10 @@ describe('groups management by student', function() {
             log.info('Feathers application started on http://%s:%d', host, port);
         });
 
-        await clearAll(users);
+        users.options.multi = true;
+        await users.remove(null);
+        users.options.multi = false;
+
         await users.create({
             username,
             password,
@@ -41,7 +44,7 @@ describe('groups management by student', function() {
     });
 
     beforeEach(async () => {
-        await clearAll(groups);
+        await app.settings.mongooseClient.connection.db.collection('groups').drop();
     });
 
     it('lists groups', async () => {
@@ -75,80 +78,6 @@ describe('groups management by student', function() {
         await assert.rejects(async () => {
             await service.patch(group._id, {
                 teacher: "franz",
-                class: "franz's class",
-            })
-        })
-    });
-
-    it('removes groups', async () => {
-        const group = groups.create(defaultClassJson)
-
-        await assert.rejects(async () => {
-            await service.remove(group._id)
-        })
-    });
-});
-
-
-describe('groups management by unauthorized user', function() {
-    const groups = app.service('groups');
-    const host = app.get('host');
-    const port = app.get('port');
-    const defaultClassJson = {
-        teacher: 'adam',
-        class: 'adam\'s class'
-    }
-
-    let server;
-
-    this.timeout(10000);
-
-    before(async () => {
-        server = app.listen(port);
-
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
-    });
-
-    beforeEach(async () => {
-        await clearAll(groups);
-
-        const { client, _ } = await makeClient();
-
-        service = client.service('groups');
-    });
-
-    it('lists groups', async () => {
-        const group = groups.create(defaultClassJson)
-
-        await assert.rejects(async () => {
-            await service.find()
-        })
-    });
-
-    it('creates groups', async () => {
-        await assert.rejects(async () => {
-            await service.create(defaultClassJson)
-        })
-    });
-
-    it('updates groups', async () => {
-        const group = groups.create(defaultClassJson)
-
-        await assert.rejects(async () => {
-            await service.update(group._id, {
-                teacher: "franz",
-                class: "franz's class",
-            })
-        })
-    });
-
-    it('patches groups', async () => {
-        const group = groups.create(defaultClassJson)
-
-        await assert.rejects(async () => {
-            await service.patch(group._id, {
                 class: "franz's class",
             })
         })
@@ -212,9 +141,7 @@ describe('groups management by teacher', function() {
     });
 
     beforeEach(async () => {
-        groups.options.multi = true;
-        await groups.remove(null);
-        groups.options.multi = false;
+        await app.settings.mongooseClient.connection.db.collection('groups').drop();
     });
 
     it('lists groups', async () => {
@@ -301,6 +228,6 @@ describe('groups management by teacher', function() {
             query: { teacher: otherUsername },
         });
 
-        assert.equal(existingGroups.length, 0);
+        assert.equal(existingGroups.length, 1);
     });
 });

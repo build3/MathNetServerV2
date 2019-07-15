@@ -138,7 +138,9 @@ describe('teacher end to end tests', function () {
     });
 
     beforeEach(async () => {
-        clearAll(repository);
+        repository.options.multi = true;
+        await repository.remove(null);
+        repository.options.multi = false;
 
         this.requestedUser = await repository.create({
             username,
@@ -246,7 +248,7 @@ describe('unathenticated user end to end tests', function () {
         server = app.listen(port);
 
         server.on('listening', async () => {
-            log('Feathers application started on http://%s:%d', host, port);
+            log.info('Feathers application started on http://%s:%d', host, port);
         });
     });
 
@@ -309,7 +311,7 @@ describe('student end to end tests', function () {
         server = app.listen(port);
 
         server.on('listening', async () => {
-            log('Feathers application started on http://%s:%d', host, port);
+            log.info('Feathers application started on http://%s:%d', host, port);
         });
     });
 
