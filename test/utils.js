@@ -43,11 +43,10 @@ function localStorage() {
     };
 }
 
-async function makeClient({
-    username, password, host, port,
-} = {}) {
+async function makeClient({ username, password, host, port } = {}) {
     const authenticate = !(username === undefined && password === undefined);
     const client = feathersClient();
+
     host = host || app.get('host');
     port = port || app.get('port');
 
@@ -59,12 +58,11 @@ async function makeClient({
     });
 
     client.configure(feathersClient.socketio(socket));
+    client.configure(feathersClient.authentication({
+        storage: localStorage(),
+    }));
 
-    if (authenticate) {
-        client.configure(feathersClient.authentication({
-            storage: localStorage(),
-        }));
-
+    if (authenticate) {       
         await client.authenticate({
             strategy: 'local',
             username,
@@ -76,7 +74,8 @@ async function makeClient({
 };
 
 async function clearAll(...services) {
-    services.forEach(async (service) => {
+    await services.forEach(async (service) => {
+        const multi = service.options.multi;
         service.options.multi = true;
         await service.remove(null);
         service.options.multi = false;
