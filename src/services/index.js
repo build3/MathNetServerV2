@@ -3,6 +3,7 @@ const classes = require('./classes/classes.service.js');
 const groups = require('./groups/groups.service.js');
 const views = require('./views/views.service.js');
 const constructions = require('./constructions/constructions.service.js');
+const workshops = require('./workshops/workshops.service.js');
 
 module.exports = (app) => {
     // Persistent
@@ -13,4 +14,5 @@ module.exports = (app) => {
 
     // Real-time
     app.configure(views);
+    app.configure(workshops);
 };
