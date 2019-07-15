@@ -8,6 +8,7 @@ const feathers = require('@feathersjs/feathers');
 const configuration = require('@feathersjs/configuration');
 const express = require('@feathersjs/express');
 const socketio = require('@feathersjs/socketio');
+const swagger = require('feathers-swagger');
 const logger = require('./logger');
 
 const middleware = require('./middleware');
@@ -37,12 +38,52 @@ app.use('/', express.static(app.get('public')));
 app.configure(express.rest());
 app.configure(socketio());
 
+// Swagger documentation configuration. Services should be registered after this.
+app.configure(swagger({
+    specs: {
+        info: {
+            title: 'Docs',
+            description: 'Docs',
+        },
+        components: {
+            schemas: {
+                authentication: {
+                    properties: {
+                        required: ['username', 'strategy', 'password'],
+                        strategy: {
+                            type: 'string',
+                            example: 'local',
+                            writeOnly: true,
+                        },
+                        username: {
+                            type: 'string',
+                            writeOnly: true,
+                        },
+                        password: {
+                            type: 'string',
+                            writeOnly: true,
+                        },
+                        accessToken: {
+                            type: 'string',
+                            readOnly: true,
+                        }
+                    },
+                },
+            },
+        },
+    },
+    openApiVersion: 3,
+    docsPath: '/docs',
+    uiIndex: true,
+}));
+
 app.configure(mongoose);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(middleware);
 app.configure(authentication);
 // Set up our services (see `services/index.js`)
+
 app.configure(services);
 // Set up event channels (see channels.js)
 app.configure(channels);
