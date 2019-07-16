@@ -11,8 +11,8 @@ module.exports = {
         find: [filterOwned],
         get: [filterOwned],
         create: [setOwner],
-        update: [authenticate('jwt'), checkOwner],
-        patch: [authenticate('jwt'), checkOwner],
+        update: [checkOwner],
+        patch: [checkOwner],
         remove: [checkOwner],
     },
 
