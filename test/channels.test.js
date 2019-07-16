@@ -1,7 +1,16 @@
 const assert = require('assert');
 
 const app = require('../src/app');
-const { clearAll, makeClient } = require('./utils');
+
+const { 
+    clearAll,
+    makeClient,
+    channelLength,
+    assertIncreased,
+    assertDecreased,
+    assertChannelLengthIs,
+    assertChannelEmpty
+ } = require('./utils');
 
 const port = app.get('port');
 
@@ -9,16 +18,8 @@ const user = {
     username: 'gauss',
     password: 'secret',
     permissions: ['admin'],
+    strategy: 'local'
 };
-
-async function authenticate(client, { username, password } = 
-        { username: user.username, password: user.password }) {
-    await client.authenticate({
-        strategy: 'local',
-        username: username,
-        password: password,
-    });
-}
 
 describe.only('Application\'s channel management tests', () => {
     const users = app.service('users');
@@ -46,7 +47,7 @@ describe.only('Application\'s channel management tests', () => {
             const anonLen = channelLength('anonymous');
             const authLen = channelLength('authenticated');
 
-            await authenticate(client);
+            await client.authenticate(user);
 
             assertDecreased(anonLen, 'anonymous');
             assertIncreased(authLen, 'authenticated');
@@ -54,7 +55,7 @@ describe.only('Application\'s channel management tests', () => {
 
         it('removes user from "authenticated" channel on logout"', async () => {
             // Ensure that user is logged-in before the test.
-            await await authenticate(client);
+            await client.authenticate(user);
 
             // Save state before the test.
             const anonLen = channelLength('anonymous');          
@@ -135,25 +136,10 @@ describe.only('Application\'s channel management tests', () => {
 
             assertIncreased(studLen, 'students');
         });
+
+        // TODO: Add tests for:
+        // * users are removed from admins/students channels;
+        // * when user is updated/patched he's added/removed
+        // from admins/students channels (see channels.js hooks).
     });
 });
-
-function channelLength(channelName) {
-    return app.channel(channelName).length;
-}
-
-function assertIncreased(before, channel) {
-    assert.equal(before + 1, channelLength(channel));
-}
-
-function assertDecreased(before, channel) {
-    assert.equal(before - 1, channelLength(channel));
-}
-
-function assertChannelLengthIs(channel, length) {
-    assert.equal(channelLength(channel), length);
-}
-
-function assertChannelEmpty(channel) {
-    assertChannelLengthIs(channel, 0);
-}

@@ -1,3 +1,4 @@
+const assert = require('assert');
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
 
@@ -82,7 +83,35 @@ async function clearAll(...services) {
     });
 }
 
+function channelLength(channelName) {
+    return app.channel(channelName).length;
+}
+
+function assertIncreased(before, channel) {
+    assert.equal(before + 1, channelLength(channel));
+}
+
+function assertDecreased(before, channel) {
+    assert.equal(before - 1, channelLength(channel));
+}
+
+function assertChannelLengthIs(channel, length) {
+    assert.equal(channelLength(channel), length);
+}
+
+function assertChannelEmpty(channel) {
+    assertChannelLengthIs(channel, 0);
+}
+
 module.exports = {
+    // General:
     makeClient,
-    clearAll
+    clearAll,
+
+    // Channel-related test utils:
+    channelLength,
+    assertIncreased,
+    assertDecreased,
+    assertChannelLengthIs,
+    assertChannelEmpty
 }
