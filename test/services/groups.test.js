@@ -1,9 +1,9 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
-const { clearAll, makeClient } = require('../utils');
+const { makeClient } = require('../utils');
 
-describe('groups management by student', function() {
+describe('groups management by student', function () {
     const users = app.service('users');
     const groups = app.service('groups');
     const host = app.get('host');
@@ -13,8 +13,8 @@ describe('groups management by student', function() {
     const password = 'testtest';
     const defaultClassJson = {
         teacher: username,
-        class: 'adam\'s class'
-    }
+        class: 'adam\'s class',
+    };
 
     let server;
     let service;
@@ -48,52 +48,52 @@ describe('groups management by student', function() {
     });
 
     it('lists groups', async () => {
-        const group = groups.create(defaultClassJson)
+        groups.create(defaultClassJson);
 
         await assert.rejects(async () => {
-            await service.find()
-        })
+            await service.find();
+        });
     });
 
     it('creates groups', async () => {
         await assert.rejects(async () => {
-            await service.create(defaultClassJson)
-        })
+            await service.create(defaultClassJson);
+        });
     });
 
     it('updates groups', async () => {
-        const group = groups.create(defaultClassJson)
+        const group = groups.create(defaultClassJson);
 
         await assert.rejects(async () => {
             await service.update(group._id, group._id, {
-                teacher: "franz",
-                class: "franz's class",
-            })
-        })
+                teacher: 'franz',
+                class: 'franz\'s class',
+            });
+        });
     });
 
     it('patches groups', async () => {
-        const group = groups.create(defaultClassJson)
+        const group = groups.create(defaultClassJson);
 
         await assert.rejects(async () => {
             await service.patch(group._id, {
-                teacher: "franz",
-                class: "franz's class",
-            })
-        })
+                teacher: 'franz',
+                class: 'franz\'s class',
+            });
+        });
     });
 
     it('removes groups', async () => {
-        const group = groups.create(defaultClassJson)
+        const group = groups.create(defaultClassJson);
 
         await assert.rejects(async () => {
-            await service.remove(group._id)
-        })
+            await service.remove(group._id);
+        });
     });
 });
 
 
-describe('groups management by teacher', function() {
+describe('groups management by teacher', function () {
     const users = app.service('users');
     const groups = app.service('groups');
     const host = app.get('host');
@@ -104,8 +104,8 @@ describe('groups management by teacher', function() {
     const password = 'testtest';
     const defaultClassJson = {
         teacher: username,
-        class: 'franz\'s class'
-    }
+        class: 'franz\'s class',
+    };
 
     let server;
     let service;
@@ -163,7 +163,7 @@ describe('groups management by teacher', function() {
     });
 
     it('creates groups', async () => {
-        const group = await service.create(defaultClassJson)
+        const group = await service.create(defaultClassJson);
 
         const existingGroups = await groups.find({
             query: { teacher: username },
@@ -174,38 +174,38 @@ describe('groups management by teacher', function() {
     });
 
     it('patches own group', async () => {
-        const group = await groups.create(defaultClassJson)
-        const className = 'changed class'
+        const group = await groups.create(defaultClassJson);
+        const className = 'changed class';
 
         await service.patch(group._id, {
             class: className,
         });
 
-        const updatedGroup = await groups.get(group._id)
+        const updatedGroup = await groups.get(group._id);
 
-        assert.equal(updatedGroup.class, className)
+        assert.equal(updatedGroup.class, className);
     });
 
     it('does not patch group of other user', async () => {
-        const className = 'class name'
+        const className = 'class name';
         const group = await groups.create({
             teacher: otherUsername,
             class: className,
-        })
+        });
 
         await assert.rejects(async () => {
             await service.patch(group._id, { class: 'changed class name' });
         });
 
-        const updatedGroup = await groups.get(group._id)
+        const updatedGroup = await groups.get(group._id);
 
-        assert.equal(updatedGroup.class, className)
+        assert.equal(updatedGroup.class, className);
     });
 
     it('removes own group', async () => {
-        const group = await groups.create(defaultClassJson)
+        const group = await groups.create(defaultClassJson);
 
-        await service.remove(group._id)
+        await service.remove(group._id);
 
         const existingGroups = await groups.find({
             query: { teacher: username },
@@ -218,11 +218,11 @@ describe('groups management by teacher', function() {
         const group = await groups.create({
             teacher: otherUsername,
             class: 'class name',
-        })
+        });
 
         await assert.rejects(async () => {
-            await service.remove(group._id)
-        })
+            await service.remove(group._id);
+        });
 
         const existingGroups = await groups.find({
             query: { teacher: otherUsername },

@@ -1,9 +1,8 @@
-const app = require('../../app');
-const checkPermissions = require('feathers-permissions');
-
 const { authenticate } = require('@feathersjs/authentication').hooks;
 
+const checkPermissions = require('feathers-permissions');
 const { setOwner, filterOwned, checkOwner } = require('./utils.hooks');
+
 
 module.exports = {
     before: {

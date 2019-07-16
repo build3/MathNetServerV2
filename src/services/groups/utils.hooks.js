@@ -1,27 +1,25 @@
-const checkPermissions = require('feathers-permissions');
-const { preventChanges } = require('feathers-hooks-common');
 const { NotFound } = require('@feathersjs/errors');
 
 const getGroupTeacher = async (context) => {
     const groups = await context.app.service('groups').find({
-            query: { _id: context.arguments[0] },
-        });
+        query: { _id: context.arguments[0] },
+    });
 
-    if (groups.length == 1) {
-        return groups[0].teacher
+    if (groups.length === 1) {
+        return groups[0].teacher;
     }
 
-    return undefined
+    return undefined;
 }
 
 async function isOwner(context) {
     const { user } = context.params;
-    const teacher = await getGroupTeacher(context)
-    return teacher == user.username
+    const teacher = await getGroupTeacher(context);
+
+    return teacher === user.username;
 }
 
 async function checkOwner(context) {
-    const user = context.params.user;
     const isResourceOwner = await isOwner(context);
 
     if (isResourceOwner) {
@@ -32,19 +30,19 @@ async function checkOwner(context) {
 }
 
 async function setOwner(context) {
-    const user = context.params.user;
+    const { user } = context.params;
 
-    if (context.params.user !== undefined) {
-        context.data['teacher'] = user.username
+    if (user !== undefined) {
+        context.data['teacher'] = user.username;
     }
 
-    return context
+    return context;
 }
 
 async function filterOwned(context) {
-    const user = context.params.user;
+    const { user } = context.params;
 
-    if (context.params.user !== undefined) {
+    if (user !== undefined) {
         context.params.query['teacher'] = user.username
     }
 

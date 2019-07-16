@@ -1,9 +1,9 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
-const { clearAll, makeClient } = require('../utils');
+const { makeClient } = require('../utils');
 
-describe('classes management by teacher', function() {
+describe('classes management by teacher', function () {
     const users = app.service('users');
     const classes = app.service('classes');
     const host = app.get('host');
@@ -17,7 +17,7 @@ describe('classes management by teacher', function() {
         teacher: username,
         name: 'franz\'s class',
         code: 'code',
-    }
+    };
 
     let server;
     let service;
@@ -76,7 +76,7 @@ describe('classes management by teacher', function() {
     });
 
     it('creates classes', async () => {
-        const studentClass = await service.create(defaultClassJson)
+        const studentClass = await service.create(defaultClassJson);
 
         const existingClasses = await classes.find({
             query: { teacher: username },
@@ -87,40 +87,39 @@ describe('classes management by teacher', function() {
     });
 
     it('patches own class', async () => {
-        const studentClass = await classes.create(defaultClassJson)
-        const className = 'changed class'
+        const studentClass = await classes.create(defaultClassJson);
+        const className = 'changed class';
 
         await service.patch(studentClass.code, {
             name: className,
         });
 
+        const updatedClass = await classes.get(studentClass.code);
 
-        const updatedClass = await classes.get(studentClass.code)
-        console.log(updatedClass)
-        assert.equal(updatedClass.name, className)
+        assert.equal(updatedClass.name, className);
     });
 
     it('does not patch class of other user', async () => {
-        const className = 'class name'
+        const className = 'class name';
         const studentClass = await classes.create({
             teacher: otherUsername,
             name: className,
             code: '4a',
-        })
+        });
 
         await assert.rejects(async () => {
             await service.patch(studentClass.code, { class: 'changed class name' });
         });
 
-        const updatedClass = await classes.get(studentClass.code)
+        const updatedClass = await classes.get(studentClass.code);
 
-        assert.equal(studentClass.name, updatedClass.name)
+        assert.equal(studentClass.name, updatedClass.name);
     });
 
     it('removes own class', async () => {
-        const studentClass = await classes.create(defaultClassJson)
+        const studentClass = await classes.create(defaultClassJson);
 
-        await service.remove(studentClass.code)
+        await service.remove(studentClass.code);
 
         const existingClasses = await classes.find({
             query: { teacher: username },
@@ -134,11 +133,11 @@ describe('classes management by teacher', function() {
             teacher: otherUsername,
             name: 'class name',
             code: '4a',
-        })
+        });
 
         await assert.rejects(async () => {
-            await service.remove(studentClass.code)
-        })
+            await service.remove(studentClass.code);
+        });
 
         const existingClasses = await classes.find({
             query: { teacher: otherUsername },

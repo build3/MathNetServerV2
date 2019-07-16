@@ -4,7 +4,7 @@ const { preventChanges } = require('feathers-hooks-common');
 
 function isOwner(context) {
     const { user } = context.params;
-    return user !== undefined && user.username == context.arguments[0];
+    return user !== undefined && user.username === context.arguments[0];
 }
 
 /**

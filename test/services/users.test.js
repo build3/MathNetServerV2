@@ -145,7 +145,7 @@ describe('teacher end to end tests', function () {
         this.requestedUser = await repository.create({
             username,
             password,
-            permissions: ["admin"],
+            permissions: ['admin'],
         });
 
         const { client, _ } = await makeClient({ username, password });
@@ -207,9 +207,9 @@ describe('teacher end to end tests', function () {
     });
 
     it('removes own account', async () => {
-        await assert.rejects(async () =>
-            await this.service.remove(this.requestedUser.username),
-        );
+        await assert.rejects(async () => {
+            await this.service.remove(this.requestedUser.username);
+        });
 
         const users = await repository.find({
             query: { username: this.requestedUser.username },
@@ -316,7 +316,7 @@ describe('student end to end tests', function () {
     });
 
     beforeEach(async () => {
-        await clearAll(repository)
+        await clearAll(repository);
 
         this.requestedUser = await repository.create({
             username,
