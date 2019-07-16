@@ -1,22 +1,23 @@
 const { NotFound } = require('@feathersjs/errors');
 
 /**
- * Checks if resource is owned by teacher returned from getTeacher function.
- */
-async function isOwner(context, getTeacher) {
-    const { user } = context.params;
-    const teacher = await getTeacher(context);
-
-    return teacher === user.username;
-}
-
-/**
  * Checks if requested user is an owner of the resource.
  */
-async function checkOwner(context, getTeacher) {
-    const isResourceOwner = await isOwner(context, getTeacher);
+async function checkOwner(context, service, query) {
+    const { user } = context.params;
 
-    if (isResourceOwner) {
+    const resourceId = context.arguments[0];
+    const resources = await context.app.service(service).find({
+        query: query,
+    });
+
+    let teacher = undefined;
+
+    if (resources.length === 1) {
+         teacher = resources[0].teacher;
+    }
+
+    if (teacher === user.username) {
         return context;
     }
 

@@ -131,9 +131,6 @@ describe('teacher end to end tests', function () {
     before(async () => {
         server = app.listen(port);
 
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
         await clearAll('users');
     });
 
@@ -244,10 +241,6 @@ describe('unathenticated user end to end tests', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
     });
 
     beforeEach(async () => {
@@ -307,10 +300,6 @@ describe('student end to end tests', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
     });
 
     beforeEach(async () => {

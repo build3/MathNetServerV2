@@ -1,17 +1,16 @@
 const checkPermissions = require('feathers-permissions');
 const { preventChanges } = require('feathers-hooks-common');
 
-
-function isOwner(context) {
-    const { user } = context.params;
-    return user !== undefined && user.username === context.arguments[0];
+function isOwner({ params: { user }, arguments: [userId, ...other] }) {
+    return user !== undefined && user.username === userId;
 }
 
 /**
- * Checks wheter requested user is admin or owns resource.
+ * Checks whether requested user is admin or owns resource.
  */
 function checkAdminOrOwner() {
     return checkPermissions({
+        // Returns allowed roles for request.
         roles(context) {
             if (isOwner(context)) {
                 return ['admin', 'student'];
@@ -23,7 +22,7 @@ function checkAdminOrOwner() {
 }
 
 /**
- * Checks wheter requested user owns resource.
+ * Checks whether requested user owns resource.
  */
 function checkOwner() {
     return function (context) {

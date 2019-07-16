@@ -3,7 +3,7 @@ const app = require('../../src/app');
 const log = require('../../src/logger');
 const { clearAll, makeClient } = require('../utils');
 
-describe('classes management by teacher', function () {
+describe('Application\'s class management', function () {
     const users = app.service('users');
     const classes = app.service('classes');
     const host = app.get('host');
@@ -26,10 +26,6 @@ describe('classes management by teacher', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
 
         users.options.multi = true;
         await users.remove(null);

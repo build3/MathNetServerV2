@@ -1,19 +1,9 @@
 const { checkOwner } = require('../utils.hooks.js');
 
-const getGroupTeacher = async (context) => {
-    const groups = await context.app.service('groups').find({
-        query: { _id: context.arguments[0] },
-    });
-
-    if (groups.length === 1) {
-        return groups[0].teacher;
-    }
-
-    return undefined;
-}
-
 async function checkGroupOwner(context) {
-    return (await checkOwner(context, getGroupTeacher))
+    // Get group id from url.
+    const groupId = context.arguments[0];
+    return (await checkOwner(context, 'groups', { _id: groupId }));
 }
 
 module.exports = { checkGroupOwner };

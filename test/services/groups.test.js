@@ -24,10 +24,6 @@ describe('groups management by student', function () {
     before(async () => {
         server = app.listen(port);
 
-        await server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
-
         users.options.multi = true;
         await users.remove(null);
         users.options.multi = false;
@@ -114,10 +110,6 @@ describe('groups management by teacher', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
 
         users.options.multi = true;
         await users.remove(null);
