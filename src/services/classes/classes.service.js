@@ -5,7 +5,7 @@ const hooks = require('./classes.hooks');
 
 module.exports = (app) => {
     const Model = createModel(app);
-    const options = { Model };
+    const options = { Model, id: 'code' };
 
     const classes = createService(options);
 

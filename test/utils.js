@@ -76,10 +76,10 @@ async function makeClient({
 };
 
 async function clearAll(...services) {
-    services.forEach(async (service) => {
-        service.options.multi = true;
-        await service.remove(null);
-        service.options.multi = false;
+    const db = app.settings.mongooseClient.connection.db;
+
+    await services.forEach(async (service) => {
+        await db.collection(service).drop();
     });
 }
 
