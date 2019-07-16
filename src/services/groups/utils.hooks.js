@@ -1,4 +1,4 @@
-const { NotFound } = require('@feathersjs/errors');
+const { checkOwner } = require('../utils.hooks.js');
 
 const getGroupTeacher = async (context) => {
     const groups = await context.app.service('groups').find({
@@ -12,41 +12,8 @@ const getGroupTeacher = async (context) => {
     return undefined;
 }
 
-async function isOwner(context) {
-    const { user } = context.params;
-    const teacher = await getGroupTeacher(context);
-
-    return teacher === user.username;
+async function checkGroupOwner(context) {
+    return (await checkOwner(context, getGroupTeacher))
 }
 
-async function checkOwner(context) {
-    const isResourceOwner = await isOwner(context);
-
-    if (isResourceOwner) {
-        return context;
-    }
-
-    throw new NotFound();
-}
-
-async function setOwner(context) {
-    const { user } = context.params;
-
-    if (user !== undefined) {
-        context.data['teacher'] = user.username;
-    }
-
-    return context;
-}
-
-async function filterOwned(context) {
-    const { user } = context.params;
-
-    if (user !== undefined) {
-        context.params.query['teacher'] = user.username
-    }
-
-    return context;
-}
-
-module.exports = { setOwner, filterOwned, checkOwner };
+module.exports = { checkGroupOwner };

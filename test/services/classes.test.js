@@ -1,7 +1,7 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
-const { makeClient } = require('../utils');
+const { clearAll, makeClient } = require('../utils');
 
 describe('classes management by teacher', function () {
     const users = app.service('users');
@@ -53,7 +53,7 @@ describe('classes management by teacher', function () {
     });
 
     beforeEach(async () => {
-        await app.settings.mongooseClient.connection.db.collection('classes').drop();
+        await clearAll('classes');
     });
 
     it('lists classes', async () => {

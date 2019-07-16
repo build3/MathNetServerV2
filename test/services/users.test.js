@@ -8,7 +8,7 @@ describe('users service', () => {
     const service = app.service('users');
 
     beforeEach(async () => {
-        await clearAll(service);
+        await clearAll('users');
     });
 
     it('registered the service', () => {
@@ -134,13 +134,11 @@ describe('teacher end to end tests', function () {
         server.on('listening', async () => {
             log.info('Feathers application started on http://%s:%d', host, port);
         });
-        await clearAll(repository);
+        await clearAll('users');
     });
 
     beforeEach(async () => {
-        repository.options.multi = true;
-        await repository.remove(null);
-        repository.options.multi = false;
+        await clearAll('users');
 
         this.requestedUser = await repository.create({
             username,
@@ -253,7 +251,7 @@ describe('unathenticated user end to end tests', function () {
     });
 
     beforeEach(async () => {
-        await clearAll(repository);
+        await clearAll('users');
 
         const { client, _ } = await makeClient();
         this.service = client.service('users');
@@ -316,7 +314,7 @@ describe('student end to end tests', function () {
     });
 
     beforeEach(async () => {
-        await clearAll(repository);
+        await clearAll('users');
 
         this.requestedUser = await repository.create({
             username,

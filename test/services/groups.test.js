@@ -1,7 +1,7 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
-const { makeClient } = require('../utils');
+const { clearAll, makeClient } = require('../utils');
 
 describe('groups management by student', function () {
     const users = app.service('users');
@@ -24,7 +24,7 @@ describe('groups management by student', function () {
     before(async () => {
         server = app.listen(port);
 
-        server.on('listening', async () => {
+        await server.on('listening', async () => {
             log.info('Feathers application started on http://%s:%d', host, port);
         });
 
@@ -44,7 +44,7 @@ describe('groups management by student', function () {
     });
 
     beforeEach(async () => {
-        await app.settings.mongooseClient.connection.db.collection('groups').drop();
+        await clearAll('groups');
     });
 
     it('lists groups', async () => {

@@ -19,7 +19,7 @@ describe.only('\'constructions\' service', () => {
     before(async () => {
         server = app.listen(port);
 
-        await clearAll(users, constructions);
+        await clearAll('users', 'constructions');
 
         await users.create({
             username: 'gauss',
