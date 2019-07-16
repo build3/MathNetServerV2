@@ -3,6 +3,7 @@ module.exports = {
     commonjs: true,
     es6: true,
     node: true,
+    mocha: true,
   },
   extends: [
     'airbnb-base',
@@ -15,6 +16,8 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
-      "indent": ["error", 4]
+      "indent": ["error", 4],
+      // Get rid of errors containing _id field from mongoDB.
+      "no-underscore-dangle": ['error', {'allow': ['_id', ]}]
   },
 };
