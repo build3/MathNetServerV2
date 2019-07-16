@@ -1,5 +1,69 @@
 const log = require('./logger');
 
+/**
+ * Join a channel given a user and connection.
+ */
+const joinChannels = (app, user, connection) => {
+    // Keep a reference to all authenticated users.
+    app.channel('authenticated').join(connection);
+
+    // Subscribe user to all attended workshops.
+    // Assumes that the workshop assignment is stored
+    // on an array of the user.
+    user.workshops.forEach(workshopId =>
+        app.channel(`workshops/${workshopId}`).join(connection)
+    );
+
+    if (user.permissions.includes('admin')) {
+        app.channel('admins').join(connection);
+    }
+
+    if (user.permissions.includes('student')) {
+        app.channel('students').join(connection);
+    }
+}
+
+/**
+ * Get a user to leave all channels.
+ */
+const leaveChannels = (app, user) => {
+    app.channel(app.channels).leave((connection) => {
+        connection = fixConnection(connection);
+        return connection.user.username === user.username
+    });
+};
+
+/**
+ * Leave and re-join all channels with new user information.
+ */
+const updateChannels = (app, user) => {
+    // Find all connections for this user.
+    const { connections } = app.channel(app.channels).filter(connection =>
+        connection.user.username === user.username
+    );
+
+    // Leave all channels
+    leaveChannels(app, user);
+
+    // Re-join all channels with the updated user information
+    connections.forEach(connection => joinChannels(user, connection));
+}
+
+/**
+ * XXX: Fix for https://github.com/feathersjs/feathers/issues/941
+ * This was addressed in version 4.0.0, which is currently in 
+ * pre-release. Update when release is stable.
+ */
+function fixConnection(connection) {
+    const _connection = Object.getOwnPropertySymbols(connection);
+    
+    if (!connection.user && _connection.length > 0) {
+        connection = connection[_connection[0]]._feathers;
+    }
+
+    return connection;
+}
+
 module.exports = (app) => {
     if (typeof app.channel !== 'function') {
         // If no real-time functionality has been configured just return.
@@ -13,66 +77,42 @@ module.exports = (app) => {
     });
 
     app.on('login', (authResult, { connection }) => {
-        log.info('Attempting to login');
-
         // Connection can be undefined if there is no
         // real-time connection, e.g. when logging in via REST.
         if (connection) {
-            // Obtain the logged in user from the connection
-            const { user } = connection;
-            user.channels = user.channels || [];
+            log.info('Login user: ', connection.user.username);
 
-            log.info('Connected user: ', connection.user);
+            joinChannels(app, connection.user, connection);
 
-            // The connection is no longer anonymous, remove it
+            // The connection is no longer anonymous, remove it.
             app.channel('anonymous').leave(connection);
-
-            // Add it to the authenticated user channel
-            app.channel('authenticated').join(connection);
-
-            if (user.permissions.includes('admin')) {
-                app.channel('admins').join(connection);
-                user.channels.push('admins');
-            }
-
-            if (user.permissions.includes('student')) {
-                app.channel('students').join(connection);
-                user.channels.push('students');
-            }
-
-            log.info('User channels', user.channels);
-
-            // If the user has joined e.g. chat rooms
-            // if (Array.isArray(user.channels)) {
-            //     user.rooms.forEach(room => app.channel(`rooms/${room.id}`).join(channel));
-            // }
-
-            // Easily organize users by email and userid for things like messaging
-            // app.channel(`emails/${user.email}`).join(channel);
-            // app.channel(`userIds/$(user.id}`).join(channel);
         }
     });
 
-    // eslint-disable-next-line no-unused-vars
+    app.on('logout', (payload, { connection }) => {
+        connection = fixConnection(connection);
+
+        if (connection && connection.user) {
+            // When logging out, leave all channels and join anonymous channel.
+            leaveChannels(app, connection.user)
+            app.channel('anonymous').join(connection);
+        }
+    });
+
+    // On `updated` and `patched`, leave and re-join with new room assignments.
+    app.service('users').on('updated', updateChannels);
+    app.service('users').on('patched', updateChannels);
+
+    // On `removed`, remove the connection from all channels
+    app.service('users').on('removed', user => leaveChannels(app, user));
+
     app.publish((data, hook) => {
         // Here you can add event publishers to channels set up in `channels.js`
         // To publish only for a specific event use `app.publish(eventname, () => {})`
 
-        log.info('Publishing all events to all authenticated users. See `channels.js` and https://docs.feathersjs.com/api/channels.html for more information.'); // eslint-disable-line
+        log.info('Publishing all events to all authenticated users.');
 
         // e.g. to publish all service events to all authenticated users use
         return app.channel('authenticated');
     });
-
-    // Here you can also add service specific event publishers
-    // e.g. the publish the `users` service `created` event to the `admins` channel
-    // app.service('users').publish('created', () => app.channel('admins'));
-
-    // With the userid and email organization from above you can easily select involved users
-    // app.service('messages').publish(() => {
-    //   return [
-    //     app.channel(`userIds/${data.createdBy}`),
-    //     app.channel(`emails/${data.recipientEmail}`)
-    //   ];
-    // });
 };

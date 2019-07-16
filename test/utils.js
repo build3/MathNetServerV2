@@ -1,3 +1,4 @@
+const assert = require('assert');
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
 
@@ -43,11 +44,10 @@ function localStorage() {
     };
 }
 
-async function makeClient({
-    username, password, host, port,
-} = {}) {
+async function makeClient({ username, password, host, port } = {}) {
     const authenticate = !(username === undefined && password === undefined);
     const client = feathersClient();
+
     host = host || app.get('host');
     port = port || app.get('port');
 
@@ -59,12 +59,11 @@ async function makeClient({
     });
 
     client.configure(feathersClient.socketio(socket));
+    client.configure(feathersClient.authentication({
+        storage: localStorage(),
+    }));
 
-    if (authenticate) {
-        client.configure(feathersClient.authentication({
-            storage: localStorage(),
-        }));
-
+    if (authenticate) {       
         await client.authenticate({
             strategy: 'local',
             username,
@@ -83,7 +82,35 @@ async function clearAll(...services) {
     });
 }
 
+function channelLength(channelName) {
+    return app.channel(channelName).length;
+}
+
+function assertIncreased(before, channel) {
+    assert.equal(before + 1, channelLength(channel));
+}
+
+function assertDecreased(before, channel) {
+    assert.equal(before - 1, channelLength(channel));
+}
+
+function assertChannelLengthIs(channel, length) {
+    assert.equal(channelLength(channel), length);
+}
+
+function assertChannelEmpty(channel) {
+    assertChannelLengthIs(channel, 0);
+}
+
 module.exports = {
+    // General:
     makeClient,
-    clearAll
+    clearAll,
+
+    // Channel-related test utils:
+    channelLength,
+    assertIncreased,
+    assertDecreased,
+    assertChannelLengthIs,
+    assertChannelEmpty
 }
