@@ -55,8 +55,10 @@ const updateChannels = (app, user) => {
  * pre-release. Update when release is stable.
  */
 function fixConnection(connection) {
-    if (!connection.user && Object.getOwnPropertySymbols(connection).length > 0) {
-        connection = connection[Object.getOwnPropertySymbols(connection)[0]]._feathers;
+    const _connection = Object.getOwnPropertySymbols(connection);
+    
+    if (!connection.user && _connection.length > 0) {
+        connection = connection[_connection[0]]._feathers;
     }
 
     return connection;

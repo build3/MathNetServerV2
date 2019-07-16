@@ -8,7 +8,7 @@ describe('users service', () => {
     const service = app.service('users');
 
     beforeEach(async () => {
-        await clearAll(service);
+        await clearAll('users');
     });
 
     it('registered the service', () => {
@@ -131,19 +131,16 @@ describe('teacher end to end tests', function () {
     before(async () => {
         server = app.listen(port);
 
-        server.on('listening', async () => {
-            log.info('Feathers application started on http://%s:%d', host, port);
-        });
-        await clearAll(repository);
+        await clearAll('users');
     });
 
     beforeEach(async () => {
-        clearAll(repository);
+        await clearAll('users');
 
         this.requestedUser = await repository.create({
             username,
             password,
-            permissions: ["admin"],
+            permissions: ['admin'],
         });
 
         const { client, _ } = await makeClient({ username, password });
@@ -205,9 +202,9 @@ describe('teacher end to end tests', function () {
     });
 
     it('removes own account', async () => {
-        await assert.rejects(async () =>
-            await this.service.remove(this.requestedUser.username),
-        );
+        await assert.rejects(async () => {
+            await this.service.remove(this.requestedUser.username);
+        });
 
         const users = await repository.find({
             query: { username: this.requestedUser.username },
@@ -244,14 +241,10 @@ describe('unathenticated user end to end tests', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log('Feathers application started on http://%s:%d', host, port);
-        });
     });
 
     beforeEach(async () => {
-        await clearAll(repository);
+        await clearAll('users');
 
         const { client, _ } = await makeClient();
         this.service = client.service('users');
@@ -307,14 +300,10 @@ describe('student end to end tests', function () {
 
     before(async () => {
         server = app.listen(port);
-
-        server.on('listening', async () => {
-            log('Feathers application started on http://%s:%d', host, port);
-        });
     });
 
     beforeEach(async () => {
-        await clearAll(repository)
+        await clearAll('users');
 
         this.requestedUser = await repository.create({
             username,

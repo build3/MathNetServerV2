@@ -1,56 +1,55 @@
-const checkPermissions = require('feathers-permissions');
-const { preventChanges } = require('feathers-hooks-common');
+const { NotFound } = require('@feathersjs/errors');
 
-
-function isOwner(context) {
+/**
+ * Checks if requested user is an owner of the resource.
+ */
+async function checkOwner(context, service, query) {
     const { user } = context.params;
-    return user !== undefined && user.username == context.arguments[0];
-}
 
-/**
- * Checks wheter requested user is admin or owns resource.
- * WARNING: So far it works only for `users` endpoint.
- */
-function checkAdminOrOwner() {
-    return checkPermissions({
-        roles(context) {
-            if (isOwner(context)) {
-                return ['admin', 'student'];
-            }
-
-            return ['admin'];
-        },
+    const resourceId = context.arguments[0];
+    const resources = await context.app.service(service).find({
+        query: query,
     });
-}
 
-/**
- * Checks wheter requested user owns resource.
- * WARNING: So far it works only for `users` endpoint.
- */
-function checkOwner() {
-    return function (context) {
-        if (isOwner(context)) {
-            return context;
-        }
+    let teacher = undefined;
 
-        return undefined;
-    };
+    if (resources.length === 1) {
+         teacher = resources[0].teacher;
+    }
+
+    if (teacher === user.username) {
+        return context;
+    }
+
+    throw new NotFound();
 }
 
 
 /**
- * Prevents to update `field` of resource, unless requested user is
- * an owner of the resource.
- * WARNING: So far it works only for `users` endpoint.
+ * Injects requested user as a teachr into resource.
  */
-function preventChangesIfNotOwner(field) {
-    return function (context) {
-        if (isOwner(context)) {
-            return context;
-        }
+async function setTeacherOwner(context) {
+    const { user } = context.params;
 
-        return preventChanges(true, field);
-    };
+    if (user !== undefined) {
+        context.data['teacher'] = user.username;
+    }
+
+    return context;
 }
 
-module.exports = { checkAdminOrOwner, checkOwner, preventChangesIfNotOwner };
+/**
+ * Adds teacher parameter into query where teacher field comes from requested
+ * user.
+ */
+async function filterOwnedByTeacher(context) {
+    const { user } = context.params;
+
+    if (user !== undefined) {
+        context.params.query['teacher'] = user.username;
+    }
+
+    return context;
+}
+
+module.exports = { checkOwner, filterOwnedByTeacher, setTeacherOwner };

@@ -13,11 +13,11 @@ module.exports = (app) => {
             type: [String], required: true,
         },
         constructions: {
-            type: [String], required: true
+            type: [String], required: true,
         },
         workshops: {
-            type: [String], required: true
-        }
+            type: [String], required: true,
+        },
     }, {
         timestamps: true,
     });

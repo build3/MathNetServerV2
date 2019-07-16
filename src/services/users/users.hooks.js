@@ -4,7 +4,8 @@ const { hashPassword, protect } = require('@feathersjs/authentication-local').ho
 
 const checkPermissions = require('feathers-permissions');
 
-const { checkAdminOrOwner, checkOwner, preventChangesIfNotOwner } = require('../utils.hooks');
+const { checkAdminOrOwner, checkOwner, preventChangesIfNotOwner } = require('./utils.hooks');
+
 
 module.exports = {
     before: {
