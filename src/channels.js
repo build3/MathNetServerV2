@@ -21,7 +21,7 @@ const joinChannels = (app, user, connection) => {
     if (user.permissions.includes('student')) {
         app.channel('students').join(connection);
     }
-}
+};
 
 /**
  * Get a user to leave all channels.
@@ -42,21 +42,21 @@ const updateChannels = (app, user) => {
         connection.user.username === user.username
     );
 
-    // Leave all channels
+    // Leave all channels.
     leaveChannels(app, user);
 
-    // Re-join all channels with the updated user information
-    connections.forEach(connection => joinChannels(user, connection));
-}
+    // Re-join all channels with the updated user information.
+    joinChannels(app, user, connections[0]);
+};
 
 /**
  * XXX: Fix for https://github.com/feathersjs/feathers/issues/941
- * This was addressed in version 4.0.0, which is currently in 
+ * This was addressed in version 4.0.0, which is currently in
  * pre-release. Update when release is stable.
  */
 function fixConnection(connection) {
     const _connection = Object.getOwnPropertySymbols(connection);
-    
+
     if (!connection.user && _connection.length > 0) {
         connection = connection[_connection[0]]._feathers;
     }
@@ -94,14 +94,14 @@ module.exports = (app) => {
 
         if (connection && connection.user) {
             // When logging out, leave all channels and join anonymous channel.
-            leaveChannels(app, connection.user)
+            leaveChannels(app, connection.user);
             app.channel('anonymous').join(connection);
         }
     });
 
     // On `updated` and `patched`, leave and re-join with new room assignments.
-    app.service('users').on('updated', updateChannels);
-    app.service('users').on('patched', updateChannels);
+    app.service('users').on('updated', user => updateChannels(app, user));
+    app.service('users').on('patched', user => updateChannels(app, user));
 
     // On `removed`, remove the connection from all channels
     app.service('users').on('removed', user => leaveChannels(app, user));
