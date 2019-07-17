@@ -199,7 +199,7 @@ describe.only('Application\'s channel management tests', () => {
             const adminLen = channelLength('admins');
 
             await users.patch(user.username, {
-                password: 'secret2',
+                password: 'secret',
             }, { user });
 
             assertChannelLengthIs('admins', adminLen);
@@ -233,6 +233,70 @@ describe.only('Application\'s channel management tests', () => {
             }, { user: student });
 
             assertChannelLengthIs('students', studentsLen);
+
+            client.logout();
+        });
+
+        it('removes student from students channel when loses permission', async () => {
+            client.logout();
+
+            await client.authenticate(student);
+
+            const studentsLen = channelLength('students');
+
+            await users.patch(student.username, {
+                permissions: [],
+            }, { user: student });
+
+            assertDecreased(studentsLen, 'students');
+
+            client.logout();
+        });
+
+        it('removes admin from admins channel when loses permission', async () => {
+            client.logout();
+
+            await client.authenticate(user);
+
+            const adminLen = channelLength('admins');
+
+            await users.patch(user.username, {
+                permissions: [],
+            }, { user });
+
+            assertDecreased(adminLen, 'admins');
+
+            client.logout();
+        });
+
+        it('adds student to students channel when loses permission', async () => {
+            client.logout();
+
+            await client.authenticate(student);
+
+            const studentsLen = channelLength('students');
+
+            await users.patch(student.username, {
+                permissions: ['student'],
+            }, { user: student });
+
+            assertIncreased(studentsLen, 'students');
+
+            client.logout();
+        });
+
+        it('adds admin to admins channel when loses permission', async () => {
+            client.logout();
+
+            await client.authenticate(user);
+
+            const adminLen = channelLength('admins');
+
+            await users.patch(user.username, {
+                permissions: ['admin'],
+            }, { user });
+
+            assertIncreased(adminLen, 'admins');
 
             client.logout();
         });
