@@ -12,6 +12,7 @@ function checkAdminOrOwner() {
     return checkPermissions({
         // Returns allowed roles for request.
         roles(context) {
+
             if (isOwner(context)) {
                 return ['admin', 'student'];
             }
