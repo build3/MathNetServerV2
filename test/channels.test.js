@@ -2,15 +2,15 @@ const assert = require('assert');
 
 const app = require('../src/app');
 
-const { 
+const {
     clearAll,
     makeClient,
     channelLength,
     assertIncreased,
     assertDecreased,
     assertChannelLengthIs,
-    assertChannelEmpty
- } = require('./utils');
+    assertChannelEmpty,
+} = require('./utils');
 
 const port = app.get('port');
 
@@ -18,7 +18,14 @@ const user = {
     username: 'gauss',
     password: 'secret',
     permissions: ['admin'],
-    strategy: 'local'
+    strategy: 'local',
+};
+
+const student = {
+    username: 'testStudent',
+    password: 'secret',
+    permissions: ['student'],
+    strategy: 'local',
 };
 
 describe.only('Application\'s channel management tests', () => {
@@ -32,6 +39,7 @@ describe.only('Application\'s channel management tests', () => {
 
         await clearAll(users);
         await users.create(user);
+        await users.create(student);
         ({ client, _ } = await makeClient());
 
         assertChannelEmpty('anonymous', 0);
@@ -58,12 +66,12 @@ describe.only('Application\'s channel management tests', () => {
             await client.authenticate(user);
 
             // Save state before the test.
-            const anonLen = channelLength('anonymous');          
+            const anonLen = channelLength('anonymous');
             const authLen = channelLength('authenticated');
 
             await client.logout();
 
-            assertIncreased(anonLen, 'anonymous');            
+            assertIncreased(anonLen, 'anonymous');
             assertDecreased(authLen, 'authenticated');
         });
 
@@ -71,7 +79,7 @@ describe.only('Application\'s channel management tests', () => {
             // Create and log-in new user.
             const user = await users.create({
                 username: 'newton',
-                password: 'secret'
+                password: 'secret',
             });
 
             await client.authenticate({
@@ -90,14 +98,14 @@ describe.only('Application\'s channel management tests', () => {
             assertDecreased(authLen, 'authenticated');
             // Check that anonymous channel did not change.
             assertChannelLengthIs('anonymous', anonLen);
-        })
+        });
 
         it('adds teacher to channel "admins"', async () => {
             await users.create({
                 username: 'teacher',
                 password: 'secret',
                 permissions: ['admin'],
-            });            
+            });
 
             // Ensure that there are no other users in "admins" channel.
             // In other case, authenicate would remove them 
@@ -121,7 +129,7 @@ describe.only('Application\'s channel management tests', () => {
                 username: 'student',
                 password: 'secret',
                 permissions: ['student'],
-            });            
+            });
 
             client.logout();
 
@@ -137,9 +145,96 @@ describe.only('Application\'s channel management tests', () => {
             assertIncreased(studLen, 'students');
         });
 
-        // TODO: Add tests for:
-        // * users are removed from admins/students channels;
-        // * when user is updated/patched he's added/removed
-        // from admins/students channels (see channels.js hooks).
+        it('removes user from students channel after logout', async () => {
+            await users.create({
+                username: 'student2',
+                password: 'secret',
+                permissions: ['student'],
+            });
+
+            client.logout();
+
+            await client.authenticate({
+                strategy: 'local',
+                username: 'student2',
+                password: 'secret',
+            });
+
+            const studLen = channelLength('students');
+
+            await client.logout();
+
+            assertDecreased(studLen, 'students');
+        });
+
+        it('removes user from admins channel after logout', async () => {
+            await client.authenticate(user);
+
+            const adminLen = channelLength('admins');
+
+            await client.logout();
+
+            assertDecreased(adminLen, 'admins');
+        });
+
+        it('check admin rejoin admins after update', async () => {
+            client.logout();
+
+            await client.authenticate(user);
+
+            const adminLen = channelLength('admins');
+
+            await users.update(user.username, user);
+
+            assertChannelLengthIs('admins', adminLen);
+
+            client.logout();
+        });
+
+        it('check admin rejoin admins after patch', async () => {
+            client.logout();
+
+            await client.authenticate(user);
+
+            const adminLen = channelLength('admins');
+
+            await users.patch(user.username, {
+                password: 'secret2',
+            }, { user });
+
+            assertChannelLengthIs('admins', adminLen);
+
+            client.logout();
+        });
+
+        it('check student rejoin students after update', async () => {
+            client.logout();
+
+            await client.authenticate(student);
+
+            const studentsLen = channelLength('students');
+
+            await users.update(student.username, student);
+
+            assertChannelLengthIs('students', studentsLen);
+
+            client.logout();
+        });
+
+        it('check student rejoin students after patch', async () => {
+            client.logout();
+
+            await client.authenticate(student);
+
+            const studentsLen = channelLength('students');
+
+            await users.patch(student.username, {
+                password: 'secret',
+            }, { user: student });
+
+            assertChannelLengthIs('students', studentsLen);
+
+            client.logout();
+        });
     });
 });

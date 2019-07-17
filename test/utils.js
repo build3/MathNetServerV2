@@ -63,7 +63,7 @@ async function makeClient({ username, password, host, port } = {}) {
         storage: localStorage(),
     }));
 
-    if (authenticate) {       
+    if (authenticate) {
         await client.authenticate({
             strategy: 'local',
             username,
@@ -72,7 +72,7 @@ async function makeClient({ username, password, host, port } = {}) {
     }
 
     return { client, socket };
-};
+}
 
 async function clearAll(...services) {
     const db = app.settings.mongooseClient.connection.db;
@@ -112,5 +112,5 @@ module.exports = {
     assertIncreased,
     assertDecreased,
     assertChannelLengthIs,
-    assertChannelEmpty
-}
+    assertChannelEmpty,
+};
