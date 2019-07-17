@@ -15,7 +15,7 @@ test-workshops:
 
 test-channels:
 	$(MOCHA) $(CHANNELS)
-	
+
 test-user:
 	$(MOCHA) $(USERS_PATH) -g "users service" &&\
 	$(MOCHA) $(USERS_PATH) -g "teacher end to end tests" &&\
@@ -30,12 +30,12 @@ test-class:
 
 test-groups:
 	 $(MOCHA) $(GROUPS_PATH) -g "groups management by teacher" &&\
-	 $(MOCHA) $(GROUPS_PATH) -g "groups management by student" &&\
+	 $(MOCHA) $(GROUPS_PATH) -g "groups management by student"
 
 test:
-	@$(MAKE) test-user &&\
-	@$(MAKE) test-construction &&\
-	@$(MAKE) test-class &&\
+	@$(MAKE) test-user
+	@$(MAKE) test-construction
+	@$(MAKE) test-class
 	@$(MAKE) test-groups
 	@$(MAKE) test-app
 	@$(MAKE) test-channels
