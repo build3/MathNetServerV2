@@ -9,8 +9,6 @@ framework for building modern real-time applications.
 
 ## Getting Started
 
-Getting up and running is as easy as 1, 2, 3.
-
 1. Make sure you have [NodeJS](https://nodejs.org/) and
    [npm](https://www.npmjs.com/) installed.
 2. Install your dependencies
@@ -19,7 +17,19 @@ Getting up and running is as easy as 1, 2, 3.
     cd path/to/mathnet; npm install
     ```
 
-3. Start your app
+3. Instal mongo db.
+The easiest way to set up mongodb is to set up docker image with mongo.
+First of all install docker.
+Then run:
+```
+docker pull mongo
+docker run -d -p 27017:27017 --name mongo mongo
+# to start/stop docker container perform
+docker start mongo
+docker stop mongo
+```
+
+4. Start your app
 
     ```
     npm start
@@ -29,8 +39,6 @@ Getting up and running is as easy as 1, 2, 3.
 
 First install mocha globally with command `npm install -g mocha`. Then run
 `make --always-make test`
-
-Simply run `npm test` and all your tests in the `test/` directory will be run.
 
 ## Scaffolding
 
