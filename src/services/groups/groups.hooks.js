@@ -10,9 +10,9 @@ module.exports = {
         find: [filterOwnedBy('teacher')],
         get: [filterOwnedBy('teacher')],
         create: [setOwner('teacher')],
-        update: [checkOwner('groups', '_id')],
-        patch: [checkOwner('groups', '_id')],
-        remove: [checkOwner('groups', '_id')],
+        update: [checkOwner('groups', '_id', 'teacher')],
+        patch: [checkOwner('groups', '_id', 'teacher')],
+        remove: [checkOwner('groups', '_id', 'teacher')],
     },
 
     after: {

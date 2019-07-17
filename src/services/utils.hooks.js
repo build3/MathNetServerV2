@@ -2,11 +2,15 @@ const { NotFound } = require('@feathersjs/errors');
 
 /**
  * Checks if requested user is an owner of the resource.
+ * @param { string } service - name of service resource comes from
+ * @param { string } queryParam - field name which allows to identify resource e.g. _id
+ * @param { string } userParam - field name of user identifier in resource e.g. owner
  */
-function checkOwner(service, queryParam) {
+function checkOwner(service, queryParam, userParam) {
     return async function (context) {
         const { user } = context.params;
         const resourceId = context.arguments[0];
+
         const query = {}
         query[queryParam] = resourceId
 
@@ -14,22 +18,19 @@ function checkOwner(service, queryParam) {
             query: query,
         });
 
-        let teacher = undefined;
+        let requestedUser = undefined;
 
         if (resources.length === 1) {
-             teacher = resources[0].teacher;
+             requestedUser = resources[0][userParam];
         }
 
-        if (teacher === user.username) {
+        if (requestedUser === user.username) {
             return context;
         }
 
         throw new NotFound();
-
-
-        return context;
     };
- }
+}
 
 
 /**
