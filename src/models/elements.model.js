@@ -4,19 +4,18 @@ module.exports = (app) => {
 
     const elements = new Schema({
         name: {
-            type: String, required: true,
+            type: String, required: true, unique: false,
         },
-        // owner === user.username
         owner: {
-            type: String, required: true,
+            type: String, required: true, unique: false,
         },
-        workshops: {
-            type: String, required: true,
+        workshop: {
+            type: String, required: true, unique: false,
         },
         // XML content of single element. Imported
         // and exported by GeoGebra applet.
         xml: {
-            type: String, required: true,
+            type: String, required: true, unique: false,
         },
     }, {
         timestamps: true,

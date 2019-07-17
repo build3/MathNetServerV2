@@ -44,7 +44,7 @@ describe('Element\'s management', function () {
         const elementData = {
             name: 'name',
             owner: username,
-            workshops: 'workshops1',
+            workshop: 'workshops1',
             xml: '<xml />'
         };
 
@@ -66,7 +66,7 @@ describe('Element\'s management', function () {
         const elementData = {
             name: 'name',
             owner: 'adam',
-            workshops: 'workshops1',
+            workshop: 'workshops1',
             xml: '<xml />'
         };
 
@@ -84,7 +84,7 @@ describe('Element\'s management', function () {
         const elementData = {
             name: 'name',
             owner: username,
-            workshops: 'workshops1',
+            workshop: 'workshops1',
             xml: '<xml />'
         };
 
@@ -103,7 +103,7 @@ describe('Element\'s management', function () {
         const elementData = {
             name: 'name',
             owner: username,
-            workshops: 'workshops1',
+            workshop: 'workshops1',
             xml: '<xml />'
         };
 

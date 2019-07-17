@@ -49,14 +49,26 @@ const updateChannels = (app, user) => {
     connections.forEach(connection => joinChannels(user, connection));
 }
 
+function elementCreated(element, context) {
+    // TODO
+}
+
+function elementModified(element, context) {
+    // TODO
+}
+
+function elementRemoved(element, context) {
+    // TODO
+}
+
 /**
  * XXX: Fix for https://github.com/feathersjs/feathers/issues/941
- * This was addressed in version 4.0.0, which is currently in 
+ * This was addressed in version 4.0.0, which is currently in
  * pre-release. Update when release is stable.
  */
 function fixConnection(connection) {
     const _connection = Object.getOwnPropertySymbols(connection);
-    
+
     if (!connection.user && _connection.length > 0) {
         connection = connection[_connection[0]]._feathers;
     }
@@ -98,6 +110,11 @@ module.exports = (app) => {
             app.channel('anonymous').join(connection);
         }
     });
+
+    app.service('elements').on('created', elementCreated);
+    app.service('elements').on('updated', elementModified);
+    app.service('elements').on('patched', elementModified);
+    app.service('elements').on('removed', elementRemoved);
 
     // On `updated` and `patched`, leave and re-join with new room assignments.
     app.service('users').on('updated', updateChannels);

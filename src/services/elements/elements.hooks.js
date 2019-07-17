@@ -6,7 +6,7 @@ module.exports = {
         all: [authenticate('jwt')],
         find: [],
         get: [],
-        create: [setOwner('user')],
+        create: [setOwner('owner')],
         update: [checkOwner('elements', '_id', 'owner')],
         patch: [checkOwner('elements', '_id', 'owner')],
         remove: [checkOwner('elements', '_id', 'owner')],
