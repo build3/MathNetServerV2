@@ -49,6 +49,18 @@ const updateChannels = (app, user) => {
     joinChannels(app, user, connections[0]);
 };
 
+function elementCreated(element, context) {
+    log.info('Element created: ', element)
+}
+
+function elementModified(element, context) {
+    log.info('Element modified: ', element)
+}
+
+function elementRemoved(element, context) {
+    log.info('Element removed: ', element)
+}
+
 /**
  * XXX: Fix for https://github.com/feathersjs/feathers/issues/941
  * This was addressed in version 4.0.0, which is currently in
@@ -98,6 +110,11 @@ module.exports = (app) => {
             app.channel('anonymous').join(connection);
         }
     });
+
+    app.service('elements').on('created', elementCreated);
+    app.service('elements').on('updated', elementModified);
+    app.service('elements').on('patched', elementModified);
+    app.service('elements').on('removed', elementRemoved);
 
     // On `updated` and `patched`, leave and re-join with new room assignments.
     app.service('users').on('updated', user => updateChannels(app, user));

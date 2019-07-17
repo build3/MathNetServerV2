@@ -2,54 +2,61 @@ const { NotFound } = require('@feathersjs/errors');
 
 /**
  * Checks if requested user is an owner of the resource.
+ * @param { string } service - name of service resource comes from
+ * @param { string } queryParam - field name which allows to identify resource e.g. _id
+ * @param { string } userParam - field name of user identifier in resource e.g. owner
  */
-async function checkOwner(context, service, query) {
-    const { user } = context.params;
+function checkOwner(service, queryParam, userParam) {
+    return async function (context) {
+        const { user } = context.params;
+        const resourceId = context.arguments[0];
 
-    const resourceId = context.arguments[0];
-    const resources = await context.app.service(service).find({
-        query: query,
-    });
+        const query = { [queryParam]: resourceId };
 
-    let teacher = undefined;
+        const resources = await context.app.service(service).find({
+            query: query,
+        });
 
-    if (resources.length === 1) {
-         teacher = resources[0].teacher;
-    }
+        let requestedUser = undefined;
 
-    if (teacher === user.username) {
-        return context;
-    }
-
-    throw new NotFound();
+        if (resources.length && resources[0][userParam] == user.username) {
+             return context;
+        } else {
+            throw new NotFound();
+        }
+    };
 }
 
 
 /**
  * Injects requested user as a teachr into resource.
  */
-async function setTeacherOwner(context) {
-    const { user } = context.params;
+function setOwner(fieldName) {
+    return function (context) {
+        const { user } = context.params;
 
-    if (user !== undefined) {
-        context.data['teacher'] = user.username;
-    }
+        if (user !== undefined) {
+             context.data[fieldName] = user.username;
+        }
 
-    return context;
+        return context;
+    };
 }
 
 /**
  * Adds teacher parameter into query where teacher field comes from requested
  * user.
  */
-async function filterOwnedByTeacher(context) {
-    const { user } = context.params;
+function filterOwnedBy(fieldName) {
+    return function (context) {
+        const { user } = context.params;
 
-    if (user !== undefined) {
-        context.params.query['teacher'] = user.username;
-    }
+        if (user !== undefined) {
+            context.params.query[fieldName] = user.username;
+        }
 
-    return context;
+        return context;
+    };
 }
 
-module.exports = { checkOwner, filterOwnedByTeacher, setTeacherOwner };
+module.exports = { checkOwner, filterOwnedBy, setOwner };

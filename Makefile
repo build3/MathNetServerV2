@@ -1,6 +1,7 @@
 MOCHA=mocha --exit
 CONSTRUCTIONS_PATH=test/services/groups.test.js
 CLASSES_PATH=test/services/classes.test.js
+ELEMENTS_PATH=test/services/elements.test.js
 USERS_PATH=test/services/users.test.js
 GROUPS_PATH=test/services/groups.test.js
 APP=test/app.test.js
@@ -15,7 +16,7 @@ test-workshops:
 
 test-channels:
 	$(MOCHA) $(CHANNELS)
-	
+
 test-user:
 	$(MOCHA) $(USERS_PATH) -g "users service" &&\
 	$(MOCHA) $(USERS_PATH) -g "teacher end to end tests" &&\
@@ -30,12 +31,16 @@ test-class:
 
 test-groups:
 	 $(MOCHA) $(GROUPS_PATH) -g "groups management by teacher" &&\
-	 $(MOCHA) $(GROUPS_PATH) -g "groups management by student" &&\
+	 $(MOCHA) $(GROUPS_PATH) -g "groups management by student"
+
+ test-elements:
+	$(MOCHA) $(ELEMENTS_PATH)
 
 test:
-	@$(MAKE) test-user &&\
-	@$(MAKE) test-construction &&\
-	@$(MAKE) test-class &&\
+	@$(MAKE) test-elements
+	@$(MAKE) test-user
+	@$(MAKE) test-construction
+	@$(MAKE) test-class
 	@$(MAKE) test-groups
 	@$(MAKE) test-app
 	@$(MAKE) test-channels
