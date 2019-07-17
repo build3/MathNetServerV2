@@ -11,8 +11,7 @@ function checkOwner(service, queryParam, userParam) {
         const { user } = context.params;
         const resourceId = context.arguments[0];
 
-        const query = {}
-        query[queryParam] = resourceId
+        const query = { [queryParam]: resourceId };
 
         const resources = await context.app.service(service).find({
             query: query,
@@ -20,15 +19,11 @@ function checkOwner(service, queryParam, userParam) {
 
         let requestedUser = undefined;
 
-        if (resources.length === 1) {
-             requestedUser = resources[0][userParam];
+        if (resources.length && resources[0][userParam] == user.username) {
+             return context;
+        } else {
+            throw new NotFound();
         }
-
-        if (requestedUser === user.username) {
-            return context;
-        }
-
-        throw new NotFound();
     };
 }
 

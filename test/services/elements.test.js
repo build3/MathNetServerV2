@@ -62,7 +62,7 @@ describe('Element\'s management', function () {
         assert.equal(result.length, 5);
     });
 
-    it('gets class of other user', async () => {
+    it('gets element of other user', async () => {
         const elementData = {
             name: 'name',
             owner: 'adam',
@@ -112,7 +112,6 @@ describe('Element\'s management', function () {
         assert.rejects(async () => {
             await service.remove(element._id);
         });
-
 
         const existingElements = await elements.find({
             query: { _id: element._id },

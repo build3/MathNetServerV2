@@ -50,15 +50,15 @@ const updateChannels = (app, user) => {
 }
 
 function elementCreated(element, context) {
-    // TODO
+    log.info('Element created: ', element)
 }
 
 function elementModified(element, context) {
-    // TODO
+    log.info('Element modified: ', element)
 }
 
 function elementRemoved(element, context) {
-    // TODO
+    log.info('Element removed: ', element)
 }
 
 /**
