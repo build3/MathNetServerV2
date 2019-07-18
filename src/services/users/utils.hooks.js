@@ -2,7 +2,8 @@ const checkPermissions = require('feathers-permissions');
 const { preventChanges } = require('feathers-hooks-common');
 
 function isOwner({ params: { user }, arguments: [userId, ...other] }) {
-    return user !== undefined && user.username === userId;
+    // If user is equal to undefined then internal call is perform.
+    return user === undefined || user.username === userId;
 }
 
 /**
