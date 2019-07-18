@@ -29,7 +29,7 @@ const joinChannels = (app, user, connection) => {
 const leaveChannels = (app, user) => {
     app.channel(app.channels).leave((connection) => {
         connection = fixConnection(connection);
-        return connection.user.username === user.username
+        return connection && connection.user && user && connection.user.username === user.username
     });
 };
 
@@ -39,7 +39,7 @@ const leaveChannels = (app, user) => {
 const updateChannels = (app, user) => {
     // Find all connections for this user.
     const { connections } = app.channel(app.channels).filter(connection =>
-        connection.user.username === user.username
+        connection.user && user && connection.user.username === user.username
     );
 
     // Leave all channels.
@@ -132,4 +132,18 @@ module.exports = (app) => {
         // e.g. to publish all service events to all authenticated users use
         return app.channel('authenticated');
     });
+
+    const actions = ['created', 'updated', 'patched', 'removed'];
+    const services = [
+        { service: 'workshops', getWorkshop: (workshop => workshop.id) },
+        { service: 'elements', getWorkshop: (element => element.workshop) },
+    ];
+
+    services.forEach(({ service, getWorkshop }) => {
+        actions.forEach(action => {
+            app.service(service).publish(action, (entity, hook) => {
+                return app.channel(`workshops/${getWorkshop(entity)}`)
+            });
+        })
+    })
 };
