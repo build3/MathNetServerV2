@@ -335,13 +335,11 @@ describe.only('Element\'s event propagation into channels', () => {
     });
 
     beforeEach(async () => {
-        await clearAll('elements');
-
         workshop = await workshops.create({
             owner: username,
-            xml: "<xml />",
-            name: "workshop",
-        })
+            xml: '<xml />',
+            name: 'workshop',
+        });
 
         await client.service('users').patch(username, { workshops: [workshop.id] });
     });
@@ -384,7 +382,7 @@ describe.only('Element\'s event propagation into channels', () => {
         };
 
         client.service('elements').once('created', data => {
-            assert.fail('User recieved event from workshop he doesn\'t belong to');
+            assert.fail('User received event from workshop he doesn\'t belong to');
         });
 
         await elements.create(elementData);

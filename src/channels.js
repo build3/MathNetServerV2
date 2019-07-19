@@ -144,6 +144,6 @@ module.exports = (app) => {
             app.service(service).publish(action, (entity, hook) => {
                 return app.channel(`workshops/${getWorkshop(entity)}`)
             });
-        })
-    })
+        });
+    });
 };

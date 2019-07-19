@@ -1,7 +1,7 @@
 const assert = require('assert');
 const app = require('../../src/app');
 const log = require('../../src/logger');
-const { clearAll, makeClient } = require('../utils');
+const { makeClient } = require('../utils');
 
 describe('Element\'s management', function () {
     const users = app.service('users');
@@ -36,23 +36,19 @@ describe('Element\'s management', function () {
         service = client.service('elements');
     });
 
-    beforeEach(async () => {
-        await clearAll('elements');
-    });
-
     it('lists elements', async () => {
         const elementData = {
             name: 'name',
             owner: username,
             workshop: 'workshops1',
-            xml: '<xml />'
+            xml: '<xml />',
         };
 
         await elements.create(elementData);
         await elements.create(elementData);
         await elements.create(elementData);
 
-        elementData['owner'] = 'adam'
+        elementData['owner'] = 'adam';
 
         await elements.create(elementData);
         await elements.create(elementData);
@@ -67,17 +63,17 @@ describe('Element\'s management', function () {
             name: 'name',
             owner: 'adam',
             workshop: 'workshops1',
-            xml: '<xml />'
+            xml: '<xml />',
         };
 
         const element = await elements.create(elementData);
 
         const existingElements = await elements.find({
-            query: {_id: element._id },
+            query: {id: element.id },
         });
 
         assert.equal(existingElements.length, 1);
-        assert.deepEqual(existingElements[0]._id, element._id);
+        assert.deepEqual(existingElements[0].id, element.id);
     });
 
     it('removes own element', async () => {
@@ -85,15 +81,15 @@ describe('Element\'s management', function () {
             name: 'name',
             owner: username,
             workshop: 'workshops1',
-            xml: '<xml />'
+            xml: '<xml />',
         };
 
         const element = await elements.create(elementData);
 
-        await service.remove(element._id);
+        await service.remove(element.id);
 
         const existingElements = await elements.find({
-            query: { _id: element._id },
+            query: { id: element.id },
         });
 
         assert.equal(existingElements.length, 0);
@@ -104,17 +100,17 @@ describe('Element\'s management', function () {
             name: 'name',
             owner: username,
             workshop: 'workshops1',
-            xml: '<xml />'
+            xml: '<xml />',
         };
 
         const element = await elements.create(elementData);
 
         assert.rejects(async () => {
-            await service.remove(element._id);
+            await service.remove(element.id);
         });
 
         const existingElements = await elements.find({
-            query: { _id: element._id },
+            query: { id: element.id },
         });
 
         assert.equal(existingElements.length, 1);

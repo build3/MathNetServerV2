@@ -16,7 +16,8 @@ test-workshops:
 
 test-channels:
 	$(MOCHA) $(CHANNELS) -g "Application's channel management tests" &&\
-	$(MOCHA) $(CHANNELS) -g "Element's event propagation into channels"
+	$(MOCHA) $(CHANNELS) -g "Element's event propagation into channels" &&\
+	$(MOCHA) $(CHANNELS) -g "Workshop's event propagation into channels"
 
 test-user:
 	$(MOCHA) $(USERS_PATH) -g "users service" &&\
@@ -34,7 +35,7 @@ test-groups:
 	 $(MOCHA) $(GROUPS_PATH) -g "groups management by teacher" &&\
 	 $(MOCHA) $(GROUPS_PATH) -g "groups management by student"
 
- test-elements:
+test-elements:
 	$(MOCHA) $(ELEMENTS_PATH)
 
 test:

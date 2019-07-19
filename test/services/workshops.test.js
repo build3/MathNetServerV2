@@ -9,8 +9,8 @@ const {
     assertIncreased,
     assertDecreased,
     assertChannelLengthIs,
-    assertChannelEmpty
- } = require('../utils');
+    assertChannelEmpty,
+} = require('../utils');
 
 const port = app.get('port');
 
@@ -18,7 +18,7 @@ const user = {
     username: 'teacher',
     password: 'secret',
     permissions: ['admin'],
-    strategy: 'local'
+    strategy: 'local',
 };
 
 describe.only('\'workshops\' service', () => {
