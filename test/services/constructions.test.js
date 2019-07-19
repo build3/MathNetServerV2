@@ -38,6 +38,12 @@ describe.only('\'constructions\' service', () => {
 
     describe('user', async () => {
         it('his constructions are assigned to them', async () => {
+            await client.authenticate({
+                username: 'gauss',
+                password: 'secret',
+                strategy: 'local',
+            });
+
             await service.create({
                 name: 'gaussian', xml: 'xml',
             });

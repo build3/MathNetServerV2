@@ -1,5 +1,5 @@
 MOCHA=mocha --exit
-CONSTRUCTIONS_PATH=test/services/groups.test.js
+CONSTRUCTIONS_PATH=test/services/constructions.test.js
 CLASSES_PATH=test/services/classes.test.js
 ELEMENTS_PATH=test/services/elements.test.js
 USERS_PATH=test/services/users.test.js

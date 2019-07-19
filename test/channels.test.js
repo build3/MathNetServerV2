@@ -28,6 +28,8 @@ const student = {
     strategy: 'local',
 };
 
+const NOT_BELONG = 'User received event from workshop he doesn\'t belong to';
+
 describe.only('Application\'s channel management tests', () => {
     const users = app.service('users');
 
@@ -37,9 +39,7 @@ describe.only('Application\'s channel management tests', () => {
     before(async () => {
         server = app.listen(port);
 
-        users.options.multi = true;
-        await users.remove(null);
-        users.options.multi = false;
+        await clearAll(users);
 
         await users.create(user);
         await users.create(student);
@@ -321,14 +321,10 @@ describe.only('Element\'s event propagation into channels', () => {
     before(async () => {
         server = app.listen(port);
 
-        users.options.multi = true;
-        await users.remove(null);
-        users.options.multi = false;
-
         await users.create({
             username,
             password,
-            permissions: ['admin']
+            permissions: ['admin'],
         });
 
         client = (await makeClient({ username, password })).client;
@@ -348,7 +344,7 @@ describe.only('Element\'s event propagation into channels', () => {
         server.close();
     });
 
-    it('recives event when element belonging to workshop is created', async () => {
+    it('user receives event when element belonging to workshop is created', async () => {
         const elementData = {
             name: 'name',
             owner: username,
@@ -367,7 +363,7 @@ describe.only('Element\'s event propagation into channels', () => {
         });
     });
 
-    it('recives event when element belonging to workshop is created', async () => {
+    it('user receives event when element belonging to workshop is created', async () => {
         const otherWorkshop = await workshops.create({
             owner: username,
             xml: '<xml />',
@@ -381,10 +377,105 @@ describe.only('Element\'s event propagation into channels', () => {
             xml: '<xml />',
         };
 
-        client.service('elements').once('created', data => {
-            assert.fail('User received event from workshop he doesn\'t belong to');
-        });
+        client.service('elements').once('created', () => assert.fail(NOT_BELONG));
 
         await elements.create(elementData);
+    });
+});
+
+
+describe.only('Workshop\'s event propagation into channels', () => {
+    const users = app.service('users');
+    const workshops = app.service('workshops');
+
+    const username = 'franz';
+    const password = 'testtest';
+
+    let server;
+    let client;
+    let workshop;
+
+    before(async () => {
+        server = app.listen(port);
+
+        await users.create({
+            username,
+            password,
+            permissions: ['admin'],
+        });
+
+        client = (await makeClient({ username, password })).client;
+    });
+
+    beforeEach(async () => {
+        workshop = await workshops.create({
+            owner: username,
+            xml: '<xml />',
+            name: 'workshop',
+        });
+
+        await client.service('users').patch(username, { workshops: [workshop.id] });
+    });
+
+    after(() => {
+        server.close();
+    });
+
+    it('creates new channel when workshop is created', async () => {
+        const newWorkshop = {
+            owner: username,
+            xml: '<xml />',
+            name: 'workshop',
+        };
+
+        const len = app.channels.length;
+
+        await workshops.create(newWorkshop);
+
+        assert.equal(len + 1, app.channels.length);
+    });
+
+    it('user receives event when workshop is created', async () => {
+        return new Promise((resolve) => {
+            client.service('workshops').once('created', data => {
+                assert.deepEqual(data.id, workshop.id);
+                assert.deepEqual(data.owner, workshop.owner);
+                resolve();
+            });
+
+            workshops.create(workshop);
+        });
+    });
+
+    it('user receives event when workshop is removed', async () => {
+        const workshopNew = await workshops.create({
+            name: 'name',
+            owner: username,
+            xml: '<xml />',
+        });
+
+        await client.service('users').patch(username, { workshops: [workshop.id, workshopNew.id] });
+
+        return new Promise((resolve) => {
+            client.service('workshops').once('removed', data => {
+                assert.deepEqual(data.id, workshopNew.id);
+                assert.deepEqual(data.owner, workshopNew.owner);
+                resolve();
+            });
+
+            workshops.remove(workshopNew.id);
+        });
+    });
+
+    it('does not send event when workshop is removed if workshop does not belong to user', async () => {
+        const workshopNew = await workshops.create({
+            name: 'name',
+            owner: username,
+            xml: '<xml />',
+        });
+
+        client.service('workshops').once('removed', () => assert.fail(NOT_BELONG));
+
+        await workshops.remove(workshopNew.id);
     });
 });
