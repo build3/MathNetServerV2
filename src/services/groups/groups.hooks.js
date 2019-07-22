@@ -2,7 +2,7 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const checkPermissions = require('feathers-permissions');
 
 const { filterOwnedBy, setOwner, checkOwner, isAdmin } = require('../utils.hooks.js');
-
+const { setGroupName } = require('./set_group_name');
 
 module.exports = {
     before: {
@@ -19,7 +19,7 @@ module.exports = {
         all: [],
         find: [],
         get: [],
-        create: [],
+        create: [setGroupName],
         update: [],
         patch: [],
         remove: [],

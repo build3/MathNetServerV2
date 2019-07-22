@@ -11,6 +11,9 @@ module.exports = (app) => {
         class: {
             type: String, required: true,
         },
+        name: {
+            type: String, required: false,
+        },
     }, {
         timestamps: true,
     });
