@@ -11,7 +11,7 @@ function checkOwner(service, queryParam, userParam) {
         const { user } = context.params;
         const resourceId = context.arguments[0];
 
-        const query = { [queryParam]: parseInt(resourceId) };
+        const query = { [queryParam]: resourceId };
 
         const resources = await context.app.service(service).find({
             query: query,
