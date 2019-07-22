@@ -1,6 +1,5 @@
 /**
- * Ensure that only owners of constructions
- * have access to them.
+ * Assigns new construction to owner.
  */
 async function assignToOwner({ params: { user: owner }, app, data }) {
     const users = app.service('users');

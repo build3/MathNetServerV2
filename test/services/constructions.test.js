@@ -8,6 +8,13 @@ const { clearAll, makeClient } = require('../utils');
 const host = app.get('host');
 const port = app.get('port');
 
+const user = {
+    username: 'gauss',
+    password: 'secret',
+    permissions: ['admin'],
+    strategy: 'local',
+};
+
 describe.only('\'constructions\' service', () => {
     const users = app.service('users');
     const constructions = app.service('constructions');
@@ -21,11 +28,7 @@ describe.only('\'constructions\' service', () => {
 
         await clearAll('users', 'constructions');
 
-        await users.create({
-            username: 'gauss',
-            password: 'secret',
-            permissions: ['admin'],
-        });
+        await users.create(user);
 
         ({ client, _ } = await makeClient(host, port, 'gauss', 'secret'));
 
@@ -38,19 +41,29 @@ describe.only('\'constructions\' service', () => {
 
     describe('user', async () => {
         it('his constructions are assigned to them', async () => {
-            await client.authenticate({
-                username: 'gauss',
-                password: 'secret',
-                strategy: 'local',
-            });
+            await client.authenticate(user);
 
             await service.create({
                 name: 'gaussian', xml: 'xml',
             });
 
-            const owner = await users.get('gauss');
+            const owner = await users.get(user.username);
 
             assert(owner.constructions.includes('gaussian'));
+        });
+
+        it('assigned constructions are removed when construction is deleted', async () => {
+            await client.authenticate(user);
+
+            const construction = await service.create({
+                name: 'test', xml: 'xml',
+            });
+
+            await service.remove(construction.name);
+
+            const owner = await users.get(user.username);
+
+            assert(!owner.constructions.includes(construction.name));
         });
     });
 

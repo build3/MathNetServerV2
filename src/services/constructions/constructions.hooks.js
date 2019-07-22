@@ -2,6 +2,7 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 
 const checkOwner = require('./check_owner');
 const assignToOwner = require('./assign_to_owner');
+const removeFromOwner = require('./remove_from_owner');
 
 module.exports = {
     before: {
@@ -21,7 +22,7 @@ module.exports = {
         create: [assignToOwner],
         update: [],
         patch: [],
-        remove: [],
+        remove: [removeFromOwner],
     },
 
     error: {
