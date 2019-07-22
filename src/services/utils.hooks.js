@@ -51,7 +51,7 @@ function filterOwnedBy(fieldName) {
     return function (context) {
         const { user } = context.params;
 
-        if (user !== undefined) {
+        if (user !== undefined && user.permissions.includes('admin')) {
             context.params.query[fieldName] = user.username;
         }
 
@@ -59,4 +59,14 @@ function filterOwnedBy(fieldName) {
     };
 }
 
-module.exports = { checkOwner, filterOwnedBy, setOwner };
+function isAdmin(context) {
+    const { user } = context.params;
+
+    if (user === undefined || !user.permissions.includes('admin')) {
+        throw new Error('Only teacher can create, update or modify classes.');
+    }
+
+    return context;
+}
+
+module.exports = { checkOwner, filterOwnedBy, setOwner, isAdmin };
