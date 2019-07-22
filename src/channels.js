@@ -132,8 +132,7 @@ module.exports = (app) => {
     app.service('elements').on('removed', elementRemoved);
 
     app.service('workshops').on('created', workshopCreated);
-    app.service('workshops').on('updated', workshopModified);
-    app.service('workshops').on('patched', workshopModified);
+    app.service('workshops').on('xml-changed', workshopModified);
     app.service('workshops').on('removed', workshopRemoved);
 
     // On `updated` and `patched`, leave and re-join with new room assignments.
