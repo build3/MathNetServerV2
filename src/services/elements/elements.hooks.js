@@ -7,9 +7,9 @@ module.exports = {
         find: [],
         get: [],
         create: [setOwner('owner')],
-        update: [checkOwner('elements', '_id', 'owner')],
-        patch: [checkOwner('elements', '_id', 'owner')],
-        remove: [checkOwner('elements', '_id', 'owner')],
+        update: [checkOwner('elements', 'id', 'owner')],
+        patch: [checkOwner('elements', 'id', 'owner')],
+        remove: [checkOwner('elements', 'id', 'owner')],
     },
 
     after: {

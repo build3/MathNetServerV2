@@ -1,17 +1,36 @@
-const m2s = require('mongoose-to-swagger');
-const createService = require('feathers-mongoose');
-const createModel = require('../../models/elements.model');
+const createService = require('feathers-memory');
 const hooks = require('./elements.hooks');
 
 module.exports = (app) => {
-    const Model = createModel(app);
-    const options = { Model };
+    const elements = createService();
 
-    const elements = createService(options);
+    const properties = {
+        name: {
+            type: 'string',
+        },
+        owner: {
+            type: 'string',
+        },
+        workshop: {
+            type: 'string',
+        },
+        xml: {
+            type: 'string',
+        },
+    };
 
     elements.docs = {
         schemas: {
-            elements: m2s(Model),
+            elements_list: {
+                type: 'array',
+                items: {
+                    properties,
+                },
+            },
+            elements: {
+                type: 'object',
+                properties,
+            },
         },
     };
 

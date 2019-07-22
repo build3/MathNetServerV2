@@ -29,7 +29,9 @@ const joinChannels = (app, user, connection) => {
 const leaveChannels = (app, user) => {
     app.channel(app.channels).leave((connection) => {
         connection = fixConnection(connection);
-        return connection.user.username === user.username
+
+        // Connection should be removed when connection is valid and user is assigned to it.
+        return connection && connection.user && user && connection.user.username === user.username
     });
 };
 
@@ -39,7 +41,8 @@ const leaveChannels = (app, user) => {
 const updateChannels = (app, user) => {
     // Find all connections for this user.
     const { connections } = app.channel(app.channels).filter(connection =>
-        connection.user.username === user.username
+        // This should be only true if user is logged (user has to be defined) and connection is assigned to him.
+        connection.user && user && connection.user.username === user.username
     );
 
     // Leave all channels.
@@ -50,15 +53,27 @@ const updateChannels = (app, user) => {
 };
 
 function elementCreated(element, context) {
-    log.info('Element created: ', element)
+    log.info('Element created: ', element);
 }
 
 function elementModified(element, context) {
-    log.info('Element modified: ', element)
+    log.info('Element modified: ', element);
 }
 
 function elementRemoved(element, context) {
-    log.info('Element removed: ', element)
+    log.info('Element removed: ', element);
+}
+
+function workshopCreated(workshop, context) {
+    log.info('Workshop created: ', workshop);
+}
+
+function workshopModified(workshop, context) {
+    log.info('Workshop modified: ', workshop);
+}
+
+function workshopRemoved(workshop, context) {
+    log.info('Workshop removed: ', workshop);
 }
 
 /**
@@ -116,6 +131,11 @@ module.exports = (app) => {
     app.service('elements').on('patched', elementModified);
     app.service('elements').on('removed', elementRemoved);
 
+    app.service('workshops').on('created', workshopCreated);
+    app.service('workshops').on('updated', workshopModified);
+    app.service('workshops').on('patched', workshopModified);
+    app.service('workshops').on('removed', workshopRemoved);
+
     // On `updated` and `patched`, leave and re-join with new room assignments.
     app.service('users').on('updated', user => updateChannels(app, user));
     app.service('users').on('patched', user => updateChannels(app, user));
@@ -131,5 +151,19 @@ module.exports = (app) => {
 
         // e.g. to publish all service events to all authenticated users use
         return app.channel('authenticated');
+    });
+
+    const actions = ['created', 'updated', 'patched', 'removed'];
+    const services = [
+        { service: 'workshops', getWorkshop: (workshop => workshop.id) },
+        { service: 'elements', getWorkshop: (element => element.workshop) },
+    ];
+
+    services.forEach(({ service, getWorkshop }) => {
+        actions.forEach(action => {
+            app.service(service).publish(action, (entity, hook) => {
+                return app.channel(`workshops/${getWorkshop(entity)}`)
+            });
+        });
     });
 };

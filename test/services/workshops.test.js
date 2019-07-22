@@ -9,8 +9,8 @@ const {
     assertIncreased,
     assertDecreased,
     assertChannelLengthIs,
-    assertChannelEmpty
- } = require('../utils');
+    assertChannelEmpty,
+} = require('../utils');
 
 const port = app.get('port');
 
@@ -18,7 +18,7 @@ const user = {
     username: 'teacher',
     password: 'secret',
     permissions: ['admin'],
-    strategy: 'local'
+    strategy: 'local',
 };
 
 describe.only('\'workshops\' service', () => {
@@ -28,6 +28,7 @@ describe.only('\'workshops\' service', () => {
     let server;
     let client;
     let service;
+    let workshop;
 
     before(async () => {
         server = app.listen(port);
@@ -37,6 +38,18 @@ describe.only('\'workshops\' service', () => {
         ({ client, _ } = await makeClient());
 
         service = client.service('workshops');
+
+        await client.authenticate(user);
+
+        workshop = await service.create({
+            owner: user.username,
+            xml: '<xml />',
+            name: 'workshop',
+        });
+
+        await client.service('users').patch(user.username, { workshops: [workshop.id] });
+
+        await client.logout();
     });
 
     after(() => {
@@ -45,7 +58,7 @@ describe.only('\'workshops\' service', () => {
 
     describe.only('Application', async () => {
         it('adds user with workshops to appriopriate workshops channels on login', async () => {
-            const workshopId = 1;
+            const workshopId = workshop.id;
             const chanLen = channelLength(`workshops/${workshopId}`);
 
             await client.authenticate(user);
