@@ -3,7 +3,7 @@ const hooks = require('./workshops.hooks');
 
 module.exports = function (app) {
     const paginate = app.get('paginate');
-    const options = { paginate };
+    const options = { paginate, events: ['xml-changed'] };
 
     // Initialize our service with any options it requires
     app.use('/workshops', createService(options));

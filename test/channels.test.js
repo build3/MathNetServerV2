@@ -467,6 +467,40 @@ describe.only('Workshop\'s event propagation into channels', () => {
         });
     });
 
+    it('user receives xml-changed', async () => {
+        const workshopNew = await workshops.create({
+            name: 'name',
+            owner: username,
+            xml: '<xml />',
+        });
+
+        await client.service('users').patch(username, { workshops: [workshop.id, workshopNew.id] });
+
+        return new Promise((resolve) => {
+            client.service('workshops').on('xml-changed', data => {
+                assert.deepEqual(data.workshop.id, workshopNew.id);
+                assert.deepEqual(data.workshop.owner, workshopNew.owner);
+                resolve();
+            });
+
+            workshops.update(workshopNew.id, workshopNew);
+        });
+    });
+
+    it('user does not receives xml-changed', async () => {
+        const workshopNew = await workshops.create({
+            name: 'name',
+            owner: username,
+            xml: '<xml />',
+        });
+
+        await client.service('users').patch(username, { workshops: [workshop.id, workshopNew.id] });
+
+        client.service('workshops').on('xml-changed', () => assert.fail(NOT_BELONG));
+
+        await workshops.patch(workshopNew.id, { name: 'test' });
+    });
+
     it('does not send event when workshop is removed if workshop does not belong to user', async () => {
         const workshopNew = await workshops.create({
             name: 'name',
