@@ -13,11 +13,11 @@ function checkOwner(service, queryParam, userParam) {
 
         const query = { [queryParam]: resourceId };
 
-        const resources = await context.app.service(service).find({
-            query: query,
-        });
+        var resources = await context.app.service(service).find({ query });
 
-        let requestedUser = undefined;
+        if (resources.hasOwnProperty('data')) {
+            resources = resources.data;
+        }
 
         if (resources.length && resources[0][userParam] == user.username) {
              return context;

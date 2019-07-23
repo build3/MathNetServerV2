@@ -72,7 +72,12 @@ function workshopModified(workshop, context) {
     log.info('Workshop modified: ', workshop);
 }
 
-function workshopRemoved(workshop, context) {
+async function workshopRemoved(workshop, context) {
+    const user = context.params.user;
+
+    await context.app.service('users').patch(workshop.owner,
+        { workshops: user.workshops.filter(ws => ws !== workshop.id) });
+
     log.info('Workshop removed: ', workshop);
 }
 

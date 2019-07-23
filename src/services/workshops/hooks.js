@@ -4,4 +4,12 @@ function XMLChanged(context) {
     }
 }
 
-module.exports = { XMLChanged };
+async function assignToOwner({ params: { user: owner }, app, result }) {
+    const users = app.service('users');
+
+    await users.patch(owner.username, {
+        workshops: [...owner.workshops, result.id],
+    });
+}
+
+module.exports = { assignToOwner, XMLChanged };
