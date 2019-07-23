@@ -1,8 +1,10 @@
 async function setGroupName(context) {
-    const groups = context.app.service('groups');
+    if (!context.data.hasOwnProperty('name') || context.data.name === '') {
+        const groups = context.app.service('groups');
 
-    await groups.patch(context.result._id, { name: `${context.result.teacher}-${context.result.class}` },
-        { user: context.params.user });
+        await groups.patch(context.result._id, { name: `${context.result.teacher}-${context.result.class}` },
+            { user: context.params.user });
+    }
 }
 
 module.exports = { setGroupName };

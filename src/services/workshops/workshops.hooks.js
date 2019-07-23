@@ -1,6 +1,6 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
-
-const { XMLChanged } = require('./hooks');
+const { setOwner } = require('../utils.hooks.js');
+const { assignToOwner, XMLChanged } = require('./hooks');
 
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
         all: [authenticate('jwt')],
         find: [],
         get: [],
-        create: [],
+        create: [setOwner('owner')],
         update: [],
         patch: [],
         remove: [],
@@ -18,7 +18,7 @@ module.exports = {
         all: [],
         find: [],
         get: [],
-        create: [],
+        create: [assignToOwner],
         update: [XMLChanged],
         patch: [XMLChanged],
         remove: [],
@@ -32,5 +32,5 @@ module.exports = {
         update: [],
         patch: [],
         remove: [],
-    }
+    },
 };
