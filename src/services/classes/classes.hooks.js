@@ -3,12 +3,14 @@ const checkPermissions = require('feathers-permissions');
 
 const { filterOwnedBy, setOwner, checkOwner, isAdmin } = require('../utils.hooks.js');
 
+const { setCode } = require('./hooks');
+
 module.exports = {
     before: {
         all: [authenticate('jwt'), checkPermissions({ roles: ['admin', 'student'] })],
         find: [filterOwnedBy('teacher')],
         get: [filterOwnedBy('teacher')],
-        create: [isAdmin, setOwner('teacher')],
+        create: [isAdmin, setOwner('teacher'), setCode],
         update: [isAdmin, checkOwner('classes', 'code', 'teacher')],
         patch: [isAdmin, checkOwner('classes', 'code', 'teacher')],
         remove: [isAdmin, checkOwner('classes', 'code', 'teacher')],

@@ -1,11 +1,10 @@
 const assert = require('assert');
 const app = require('../../src/app');
-const log = require('../../src/logger');
+
 const { clearAll, makeClient } = require('../utils');
 
-describe('Application\'s class management', function () {
+describe('Application\'s class management', () => {
     const users = app.service('users');
-    const classes = app.service('classes');
     const host = app.get('host');
     const port = app.get('port');
 
@@ -14,15 +13,27 @@ describe('Application\'s class management', function () {
     const password = 'testtest';
 
     const defaultClassJson = {
-        teacher: username,
         name: 'franz\'s class',
         code: 'code',
     };
 
+    const user = {
+        username,
+        password,
+        permissions: ['admin'],
+        strategy: 'local',
+    };
+
+    const otherUser = {
+        username: otherUsername,
+        password,
+        permissions: ['admin'],
+        strategy: 'local',
+    };
+
     let server;
     let service;
-
-    this.timeout(10000);
+    let client;
 
     before(async () => {
         server = app.listen(port);
@@ -43,7 +54,7 @@ describe('Application\'s class management', function () {
             permissions: ['admin'],
         });
 
-        const { client, _ } = await makeClient({ username, password });
+        ({ client, _ } = await makeClient());
 
         service = client.service('classes');
     });
@@ -53,28 +64,39 @@ describe('Application\'s class management', function () {
     });
 
     it('lists classes', async () => {
+        await client.authenticate(user);
+
         const otherUserClassData = {
-            teacher: otherUsername,
             name: 'other class name',
             code: '2a',
         };
 
-        await classes.create(defaultClassJson);
-        await classes.create(defaultClassJson);
-        await classes.create(defaultClassJson);
+        await service.create(defaultClassJson);
+        await service.create(defaultClassJson);
+        await service.create(defaultClassJson);
 
-        await classes.create(otherUserClassData);
-        await classes.create(otherUserClassData);
+        await client.logout();
+
+        await client.authenticate(otherUser);
+
+        await service.create(otherUserClassData);
+        await service.create(otherUserClassData);
+
+        await client.logout();
+
+        await client.authenticate(user);
 
         const result = await service.find();
 
         assert.equal(result.length, 3);
-    });
+    }).timeout(2500);
 
     it('creates classes', async () => {
+        await client.authenticate(user);
+
         const studentClass = await service.create(defaultClassJson);
 
-        const existingClasses = await classes.find({
+        const existingClasses = await service.find({
             query: { teacher: username },
         });
 
@@ -83,41 +105,56 @@ describe('Application\'s class management', function () {
     });
 
     it('patches own class', async () => {
-        const studentClass = await classes.create(defaultClassJson);
+        await client.authenticate(user);
+
+        const studentClass = await service.create(defaultClassJson);
         const className = 'changed class';
 
         await service.patch(studentClass.code, {
             name: className,
         });
 
-        const updatedClass = await classes.get(studentClass.code);
+        const updatedClass = await service.get(studentClass.code);
 
         assert.equal(updatedClass.name, className);
     });
 
     it('does not patch class of other user', async () => {
+        await client.logout();
+
+        await client.authenticate(otherUser);
+
         const className = 'class name';
-        const studentClass = await classes.create({
-            teacher: otherUsername,
+        const studentClass = await service.create({
             name: className,
             code: '4a',
         });
 
-        await assert.rejects(async () => {
+        await client.logout();
+
+        await client.authenticate(user);
+
+        assert.rejects(async () => {
             await service.patch(studentClass.code, { class: 'changed class name' });
         });
 
-        const updatedClass = await classes.get(studentClass.code);
+        await client.logout();
+
+        await client.authenticate(otherUser);
+
+        const updatedClass = await service.get(studentClass.code);
 
         assert.equal(studentClass.name, updatedClass.name);
-    });
+    }).timeout(2500);
 
     it('removes own class', async () => {
-        const studentClass = await classes.create(defaultClassJson);
+        await client.authenticate(user);
 
-        await service.remove(studentClass.code);
+        const studentClass = await service.create(defaultClassJson, { user });
 
-        const existingClasses = await classes.find({
+        await service.remove(studentClass.code, { user });
+
+        const existingClasses = await service.find({
             query: { teacher: username },
         });
 
@@ -125,20 +162,68 @@ describe('Application\'s class management', function () {
     });
 
     it('does not remove class of other user', async () => {
-        const studentClass = await classes.create({
-            teacher: otherUsername,
+        await client.logout();
+
+        await client.authenticate(otherUser);
+
+        const studentClass = await service.create({
             name: 'class name',
             code: '4a',
         });
+
+        await client.logout();
+
+        await client.authenticate(user);
 
         await assert.rejects(async () => {
             await service.remove(studentClass.code);
         });
 
-        const existingClasses = await classes.find({
+        await client.logout();
+
+        await client.authenticate(otherUser);
+
+        const existingClasses = await service.find({
             query: { teacher: otherUsername },
         });
 
         assert.equal(existingClasses.length, 1);
+    }).timeout(2500);
+
+    it('creates custom code when user didn\'t specify code', async () => {
+        await client.authenticate(user);
+
+        const newClass = await service.create({
+            name: 'test',
+        });
+
+        assert.ok(newClass.hasOwnProperty('code'));
+    });
+
+    it('creates custom code when empty code was sent', async () => {
+        await client.authenticate(user);
+
+        const code = '';
+
+        const newClass = await service.create({
+            name: 'test',
+            code,
+        });
+
+        assert.ok(newClass.hasOwnProperty('code'));
+        assert.notDeepEqual(code, newClass);
+    });
+
+    it('does not override code when it was sent', async () => {
+        await client.authenticate(user);
+
+        const code = 'test';
+
+        const newClass = await service.create({
+            name: 'test',
+            code,
+        });
+
+        assert.deepEqual(code, newClass.code);
     });
 });

@@ -36,7 +36,7 @@ function setOwner(fieldName) {
         const { user } = context.params;
 
         if (user !== undefined) {
-             context.data[fieldName] = user.username;
+            context.data[fieldName] = user.username;
         }
 
         return context;
@@ -69,4 +69,8 @@ function isAdmin(context) {
     return context;
 }
 
-module.exports = { checkOwner, filterOwnedBy, setOwner, isAdmin };
+function isUndefinedOrBlank(object, property) {
+    return !object.hasOwnProperty(property) || object[property] == '';
+}
+
+module.exports = { checkOwner, filterOwnedBy, setOwner, isAdmin, isUndefinedOrBlank };
