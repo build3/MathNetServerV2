@@ -411,4 +411,8 @@ describe('User password change', async () => {
             await users.patch(username, { password: 'test', oldPassword: '' });
         });
     });
+
+    it('changes password when oldPassword is good', async () => {
+        await users.patch(username, { password, oldPassword: password });
+    });
 });
