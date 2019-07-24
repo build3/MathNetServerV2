@@ -375,3 +375,40 @@ describe('student end to end tests', function () {
         assert.equal(users.length, 1);
     });
 });
+
+describe('User password change', async () => {
+    const users = app.service('users');
+    const port = app.get('port');
+
+    const username = 'test';
+    const password = 'secret';
+
+    let server;
+
+    const user = {
+        strategy: 'local',
+        password,
+        username,
+    };
+
+    before(async () => {
+        server = app.listen(port);
+
+        await clearAll('users');
+        await users.create(user);
+
+        const { client, _ } = await makeClient({ username, password });
+    });
+
+    it('returns bad request when oldPassword is missing in payload', async () => {
+        assert.rejects(async () => {
+            await users.patch(username, { password: 'test' });
+        });
+    });
+
+    it('returns bad request when oldPassword is empty', async () => {
+        assert.rejects(async () => {
+            await users.patch(username, { password: 'test', oldPassword: '' });
+        });
+    });
+});

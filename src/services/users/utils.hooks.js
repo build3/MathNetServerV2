@@ -1,3 +1,4 @@
+const { BadRequest } = require('@feathersjs/errors');
 const checkPermissions = require('feathers-permissions');
 const { preventChanges } = require('feathers-hooks-common');
 
@@ -50,4 +51,19 @@ function preventChangesIfNotOwner(field) {
     };
 }
 
-module.exports = { checkAdminOrOwner, checkOwner, preventChangesIfNotOwner };
+function checkOldPassword(context) {
+    if (context.data.hasOwnProperty('password')) {
+        if (!context.data.hasOwnProperty('oldPassword') || context.data.oldPassword === '') {
+            throw new BadRequest('Old password is required.');
+        }
+    }
+
+    return context;
+}
+
+module.exports = {
+    checkAdminOrOwner,
+    checkOldPassword,
+    checkOwner,
+    preventChangesIfNotOwner,
+};
