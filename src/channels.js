@@ -75,7 +75,7 @@ function workshopModified(workshop, context) {
 async function workshopRemoved(workshop, context) {
     const user = context.params.user;
 
-    await context.app.service('users').patch(workshop.owner,
+    await context.app.service('users').patch(user.username,
         { workshops: user.workshops.filter(ws => ws !== workshop.id) });
 
     log.info('Workshop removed: ', workshop);

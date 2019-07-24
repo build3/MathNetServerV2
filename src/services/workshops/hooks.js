@@ -4,12 +4,18 @@ function XMLChanged(context) {
     }
 }
 
-async function assignToOwner({ params: { user: owner }, app, result }) {
+async function assignToOwner({ params: { user: owner }, app, result, service }) {
     const users = app.service('users');
 
-    await users.patch(owner.username, {
-        workshops: [...owner.workshops, result.id],
-    });
+    const user = await users.get(owner.username);
+
+    if (!user.workshops.includes(result.id)) {
+        await users.patch(owner.username, {
+            workshops: [...owner.workshops, result.id],
+        });
+    }
+
+    service.emit('xml-changed', { workshop: result });
 }
 
 module.exports = { assignToOwner, XMLChanged };
