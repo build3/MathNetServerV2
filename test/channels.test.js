@@ -315,6 +315,7 @@ describe.only('Element\'s event propagation into channels', () => {
     let client;
     let workshop;
     let workshops;
+    let groups;
 
     before(async () => {
         server = app.listen(port);
@@ -324,14 +325,20 @@ describe.only('Element\'s event propagation into channels', () => {
         ({ client, _ } = await makeClient());
 
         workshops = client.service('workshops');
+        groups = client.service('groups');
 
         await client.authenticate(user);
     });
 
     beforeEach(async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         workshop = await workshops.create({
+            id: group._id,
             xml: '<xml />',
-            name: 'workshop',
         });
     });
 
@@ -363,9 +370,14 @@ describe.only('Element\'s event propagation into channels', () => {
             strategy: 'local',
         };
 
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const otherWorkshop = await workshops.create({
-            xml: '<xml />',
-            name: 'workshop',
+            xml: 'test',
+            id: group._id,
         });
 
         await client.logout();
@@ -393,6 +405,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
     let client;
     let workshop;
     let workshops;
+    let groups;
 
     before(async () => {
         server = app.listen(port);
@@ -402,14 +415,20 @@ describe.only('Workshop\'s event propagation into channels', () => {
         ({ client, _ } = await makeClient());
 
         workshops = client.service('workshops');
+        groups = client.service('groups');
 
         await client.authenticate(user);
     });
 
     beforeEach(async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         workshop = await workshops.create({
             xml: '<xml />',
-            name: 'workshop',
+            id: group._id,
         });
     });
 
@@ -418,9 +437,14 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('creates new channel when workshop is created', async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const newWorkshop = {
             xml: '<xml />',
-            name: 'workshop',
+            id: group._id,
         };
 
         const len = app.channels.length;
@@ -432,8 +456,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
 
     it('user receives event when workshop is created', async () => {
         return new Promise((resolve) => {
-            client.service('workshops').once('created', data => {
-                assert.deepEqual(data.id, workshop.id);
+            client.service('workshops').once('xml-changed', data => {
                 resolve();
             });
 
@@ -442,14 +465,18 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user receives event when workshop is removed', async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const workshopNew = await workshops.create({
-            name: 'name',
             xml: '<xml />',
+            id: group._id,
         });
 
         return new Promise((resolve) => {
             client.service('workshops').on('removed', data => {
-                assert.deepEqual(data.id, workshopNew.id);
                 resolve();
             });
 
@@ -458,14 +485,18 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user receives xml-changed', async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const workshopNew = await workshops.create({
-            name: 'name',
             xml: '<xml />',
+            id: group._id,
         });
 
         return new Promise((resolve) => {
             client.service('workshops').on('xml-changed', data => {
-                assert.deepEqual(data.workshop.id, workshopNew.id);
                 resolve();
             });
 
@@ -474,9 +505,14 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user does not receives xml-changed', async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const workshopNew = await workshops.create({
-            name: 'name',
             xml: '<xml />',
+            id: group._id,
         });
 
         client.service('workshops').on('xml-changed', () => assert.fail(NOT_BELONG));
@@ -498,9 +534,14 @@ describe.only('Workshop\'s event propagation into channels', () => {
 
         await client.authenticate(user2);
 
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
         const workshopNew = await workshops.create({
-            name: 'name',
             xml: '<xml />',
+            id: group._id,
         });
 
         await client.logout(user2);
@@ -510,5 +551,5 @@ describe.only('Workshop\'s event propagation into channels', () => {
         client.service('workshops').once('removed', () => assert.fail(NOT_BELONG));
 
         await workshops.remove(workshopNew.id);
-    });
+    }).timeout(4000);
 });

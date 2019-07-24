@@ -16,7 +16,7 @@ module.exports = (app) => {
             type: [String], required: true,
         },
         workshops: {
-            type: [Number], required: true,
+            type: [String], required: true,
         },
     }, {
         timestamps: true,

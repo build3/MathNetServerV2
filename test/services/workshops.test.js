@@ -1,4 +1,3 @@
-const { NotFound } = require('@feathersjs/errors');
 const assert = require('assert');
 
 const app = require('../../src/app');
@@ -28,7 +27,6 @@ const student = {
 
 const testWorkshop = {
     xml: '<xml />',
-    name: 'workshop',
 };
 
 describe.only('\'workshops\' service', () => {
@@ -38,6 +36,8 @@ describe.only('\'workshops\' service', () => {
     let client;
     let service;
     let workshop;
+    let groups;
+    let group;
 
     before(async () => {
         server = app.listen(port);
@@ -49,6 +49,7 @@ describe.only('\'workshops\' service', () => {
         ({ client, _ } = await makeClient());
 
         service = client.service('workshops');
+        groups = client.service('groups');
     });
 
     after(() => {
@@ -59,9 +60,14 @@ describe.only('\'workshops\' service', () => {
         it('adds user with workshops to appriopriate workshops channels on login', async () => {
             await client.authenticate(user);
 
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
             workshop = await service.create({
+                id: group._id,
                 xml: '<xml />',
-                name: 'workshop',
             });
 
             await client.logout();
@@ -78,28 +84,15 @@ describe.only('\'workshops\' service', () => {
     });
 
     describe.only('Workshop hooks', async () => {
-        it('sets owner when admin creates new workshop', async () => {
-            await client.authenticate(user);
-
-            const createdWorkshop = await service.create(testWorkshop);
-
-            assert.deepEqual(createdWorkshop.owner, user.username);
-
-            await client.logout();
-        });
-
-        it('sets owner when student creates new workshop', async () => {
-            await client.authenticate(student);
-
-            const createdWorkshop = await service.create(testWorkshop);
-
-            assert.deepEqual(createdWorkshop.owner, student.username);
-
-            await client.logout();
-        });
-
         it('adds workshop to admin workshops after creation', async () => {
             await client.authenticate(user);
+
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            testWorkshop.id = group._id;
 
             const createdWorkshop = await service.create(testWorkshop);
 
@@ -150,7 +143,7 @@ describe.only('\'workshops\' service', () => {
             await client.logout();
         });
 
-        it('does not removes workshop not owned by authenticated user', async () => {
+        it('does removes workshop not owned by authenticated user', async () => {
             await client.authenticate(user);
 
             const createdWorkshop = await service.create(testWorkshop);
@@ -159,14 +152,12 @@ describe.only('\'workshops\' service', () => {
 
             await client.authenticate(student);
 
-            assert.rejects(async () => {
-                await service.remove(createdWorkshop.id);
-            });
+            await service.remove(createdWorkshop.id);
 
             await client.logout();
         });
 
-        it('does not updates workshop not owned by authenticated user', async () => {
+        it('does updates workshop not owned by authenticated user', async () => {
             await client.authenticate(user);
 
             const createdWorkshop = await service.create(testWorkshop);
@@ -175,9 +166,7 @@ describe.only('\'workshops\' service', () => {
 
             await client.authenticate(student);
 
-            assert.rejects(async () => {
-                await service.update(createdWorkshop.id, createdWorkshop);
-            });
+            await service.update(createdWorkshop.id, createdWorkshop);
 
             await client.logout();
         });
