@@ -376,7 +376,7 @@ describe('student end to end tests', function () {
     });
 });
 
-describe('User password change', async () => {
+describe('user password change', async () => {
     const users = app.service('users');
     const port = app.get('port');
 
