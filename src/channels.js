@@ -70,6 +70,10 @@ function workshopCreated(workshop, context) {
 
 function workshopModified(workshop, context) {
     log.info('Workshop modified: ', workshop);
+
+    if (context.data.hasOwnProperty('xml')) {
+        context.service.emit('xml-changed', workshop, context);
+    }
 }
 
 async function workshopRemoved(workshop, context) {
@@ -137,7 +141,8 @@ module.exports = (app) => {
     app.service('elements').on('removed', elementRemoved);
 
     app.service('workshops').on('created', workshopCreated);
-    app.service('workshops').on('xml-changed', workshopModified);
+    app.service('workshops').on('patched', workshopModified);
+    app.service('workshops').on('updated', workshopModified);
     app.service('workshops').on('removed', workshopRemoved);
 
     // On `updated` and `patched`, leave and re-join with new room assignments.
@@ -157,7 +162,7 @@ module.exports = (app) => {
         return app.channel('authenticated');
     });
 
-    const actions = ['created', 'updated', 'patched', 'removed'];
+    const actions = ['created', 'updated', 'patched', 'removed', 'xml-changed'];
     const services = [
         { service: 'workshops', getWorkshop: (workshop => workshop.id) },
         { service: 'elements', getWorkshop: (element => element.workshop) },
@@ -167,6 +172,7 @@ module.exports = (app) => {
         actions.forEach(action => {
             app.service(service).publish(action, (entity, hook) => {
                 return app.channel(`workshops/${getWorkshop(entity)}`)
+                    .filter(connection => connection.user.username !== hook.params.user.username);
             });
         });
     });

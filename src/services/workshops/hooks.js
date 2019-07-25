@@ -1,9 +1,3 @@
-function XMLChanged(context) {
-    if (context.data.hasOwnProperty('xml')) {
-        context.service.emit('xml-changed', { workshop: context.result });
-    }
-}
-
 async function assignToOwner({ params: { user: owner }, app, result, service }) {
     const users = app.service('users');
 
@@ -14,8 +8,6 @@ async function assignToOwner({ params: { user: owner }, app, result, service }) 
             workshops: [...owner.workshops, result.id],
         });
     }
-
-    service.emit('xml-changed', { workshop: result });
 }
 
-module.exports = { assignToOwner, XMLChanged };
+module.exports = { assignToOwner };
