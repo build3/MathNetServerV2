@@ -478,12 +478,12 @@ describe.only('Workshop\'s event propagation into channels', () => {
         assert.equal(len + 1, app.channels.length);
     });
 
-    it('user receives event when workshop is created', async () => {
+    it('receives event when workshop is created', async () => {
         await client2.authenticate(otherUser);
         await workshops2.create(workshop);
 
         return new Promise((resolve) => {
-            client2.service('workshops').once('xml-changed', data => {
+            client2.service('workshops').once('created', data => {
                 resolve();
             });
 
@@ -491,7 +491,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
         });
     });
 
-    it('user receives event when workshop is removed', async () => {
+    it('receives event when workshop is removed', async () => {
         await client2.authenticate(otherUser);
 
         const group = await groups.create({
@@ -515,7 +515,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
         });
     });
 
-    it('user receives xml-changed', async () => {
+    it('receives xml-changed when xml changed', async () => {
         await client2.authenticate(otherUser);
 
         const group = await groups.create({
@@ -535,11 +535,13 @@ describe.only('Workshop\'s event propagation into channels', () => {
                 resolve();
             });
 
-            workshops.update(workshopNew.id, workshopNew);
+            workshops.update(workshopNew.id, {
+                xml: '<x />',
+            });
         });
     });
 
-    it('user does not receives xml-changed', async () => {
+    it('does not receives xml-changed', async () => {
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -587,4 +589,20 @@ describe.only('Workshop\'s event propagation into channels', () => {
 
         await workshops.remove(workshopNew.id);
     }).timeout(4000);
+
+    it('does not receives xml-changed when nothing changet', async () => {
+        const group = await groups.create({
+            name: 'Test',
+            class: 'Test',
+        });
+
+        const workshopNew = await workshops.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        client.service('workshops').on('xml-changed', () => assert.fail(NOT_BELONG));
+
+        await workshops.patch(workshopNew.id, { xml: '<xml />' });
+    });
 });

@@ -71,7 +71,7 @@ function workshopCreated(workshop, context) {
 function workshopModified(workshop, context) {
     log.info('Workshop modified: ', workshop);
 
-    if (context.data.hasOwnProperty('xml')) {
+    if (context.data.xmlChanged) {
         context.service.emit('xml-changed', workshop, context);
     }
 }
