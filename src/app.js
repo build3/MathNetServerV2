@@ -36,7 +36,13 @@ app.use('/', express.static(app.get('public')));
 
 // Set up Plugins and providers
 app.configure(express.rest());
-app.configure(socketio());
+app.configure(socketio((io) => {
+    io.on('connection', (socket) => {
+        socket.on('ping-rate', () => {
+            socket.emit('pong-rate');
+        });
+    });
+}));
 
 // Swagger documentation configuration. Services should be registered after this.
 app.configure(swagger({
