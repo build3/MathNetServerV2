@@ -29,6 +29,14 @@ const student = {
     strategy: 'local',
 };
 
+const otherUser = {
+    username: 'gauss2',
+    password: 'secret',
+    permissions: ['admin'],
+    strategy: 'local',
+    workshops: [],
+}
+
 const NOT_BELONG = 'User received event from workshop he doesn\'t belong to';
 
 describe.only('Application\'s channel management tests', () => {
@@ -309,28 +317,35 @@ describe.only('Application\'s channel management tests', () => {
 
 describe.only('Element\'s event propagation into channels', () => {
     const users = app.service('users');
-    const elements = app.service('elements');
 
     let server;
     let client;
     let workshop;
     let workshops;
     let groups;
+    let client2;
+    let workshops2;
+    let elements;
 
     before(async () => {
         server = app.listen(port);
 
         await users.create(user);
+        await users.create(otherUser);
 
         ({ client, _ } = await makeClient());
+        ({ client: client2, _ } = await makeClient());
 
         workshops = client.service('workshops');
         groups = client.service('groups');
 
-        await client.authenticate(user);
+        workshops2 = client2.service('workshops');
+        elements = client.service('elements');
     });
 
     beforeEach(async () => {
+        await client.authenticate(user);
+
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -347,6 +362,9 @@ describe.only('Element\'s event propagation into channels', () => {
     });
 
     it('user receives event when element belonging to workshop is created', async () => {
+        await client2.authenticate(otherUser);
+        await workshops2.create(workshop);
+
         const elementData = {
             name: 'name',
             workshop: workshop.id,
@@ -354,14 +372,14 @@ describe.only('Element\'s event propagation into channels', () => {
         };
 
         return new Promise((resolve) => {
-            client.service('elements').once('created', data => {
+            client2.service('elements').once('created', data => {
                 assert.deepEqual(data.workshop, workshop.id);
                 resolve();
             });
 
             elements.create(elementData);
         });
-    });
+    }).timeout(10000);
 
     it('user receives event when element belonging to workshop is created', async () => {
         const user2 = {
@@ -406,21 +424,27 @@ describe.only('Workshop\'s event propagation into channels', () => {
     let workshop;
     let workshops;
     let groups;
+    let client2;
+    let workshops2;
 
     before(async () => {
         server = app.listen(port);
 
         await users.create(user);
+        await users.create(otherUser);
 
         ({ client, _ } = await makeClient());
+        ({ client: client2, _ } = await makeClient());
 
         workshops = client.service('workshops');
         groups = client.service('groups');
 
-        await client.authenticate(user);
+        workshops2 = client2.service('workshops');
     });
 
     beforeEach(async () => {
+        await client.authenticate(user);
+
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -455,8 +479,11 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user receives event when workshop is created', async () => {
+        await client2.authenticate(otherUser);
+        await workshops2.create(workshop);
+
         return new Promise((resolve) => {
-            client.service('workshops').once('xml-changed', data => {
+            client2.service('workshops').once('xml-changed', data => {
                 resolve();
             });
 
@@ -465,6 +492,8 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user receives event when workshop is removed', async () => {
+        await client2.authenticate(otherUser);
+
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -475,8 +504,10 @@ describe.only('Workshop\'s event propagation into channels', () => {
             id: group._id,
         });
 
+        await workshops2.create(workshopNew);
+
         return new Promise((resolve) => {
-            client.service('workshops').on('removed', data => {
+            client2.service('workshops').on('removed', data => {
                 resolve();
             });
 
@@ -485,6 +516,8 @@ describe.only('Workshop\'s event propagation into channels', () => {
     });
 
     it('user receives xml-changed', async () => {
+        await client2.authenticate(otherUser);
+
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -495,8 +528,10 @@ describe.only('Workshop\'s event propagation into channels', () => {
             id: group._id,
         });
 
+        await workshops2.create(workshopNew);
+
         return new Promise((resolve) => {
-            client.service('workshops').on('xml-changed', data => {
+            client2.service('workshops').on('xml-changed', data => {
                 resolve();
             });
 
