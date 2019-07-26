@@ -1,5 +1,7 @@
+const { BadRequest } = require('@feathersjs/errors');
 const checkPermissions = require('feathers-permissions');
 const { preventChanges } = require('feathers-hooks-common');
+const { Verifier } = require('@feathersjs/authentication-local');
 
 function isOwner({ params: { user }, arguments: [userId, ...other] }) {
     // If user is equal to undefined then internal call is perform.
@@ -50,4 +52,29 @@ function preventChangesIfNotOwner(field) {
     };
 }
 
-module.exports = { checkAdminOrOwner, checkOwner, preventChangesIfNotOwner };
+async function checkOldPassword(context) {
+    const oldPassword = context.data.oldPassword;
+    const user = context.params.user;
+
+    if (context.data.hasOwnProperty('password')) {
+        if (!context.data.hasOwnProperty('oldPassword') || oldPassword === '') {
+            throw new BadRequest('Old password is required.');
+        } else {
+            try {
+                const verifier = new Verifier(context.app, { service: 'users', passwordField: 'password' });
+                await verifier._comparePassword(user, oldPassword);
+            } catch (e) {
+                throw new BadRequest('Old password is wrong');
+            }
+        }
+    }
+
+    return context;
+}
+
+module.exports = {
+    checkAdminOrOwner,
+    checkOldPassword,
+    checkOwner,
+    preventChangesIfNotOwner,
+};

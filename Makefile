@@ -23,7 +23,8 @@ test-user:
 	$(MOCHA) $(USERS_PATH) -g "users service" &&\
 	$(MOCHA) $(USERS_PATH) -g "teacher end to end tests" &&\
 	$(MOCHA) $(USERS_PATH) -g "unathenticated user end to end tests" &&\
-	$(MOCHA) $(USERS_PATH) -g "student end to end tests"
+	$(MOCHA) $(USERS_PATH) -g "student end to end tests" &&\
+	$(MOCHA) $(USERS_PATH) -g "user password change"
 
 test-construction:
 	$(MOCHA) $(CONSTRUCTIONS_PATH) -g "user"
