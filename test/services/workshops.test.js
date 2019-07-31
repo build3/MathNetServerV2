@@ -104,7 +104,18 @@ describe.only('\'workshops\' service', () => {
         });
 
         it('adds workshop to student workshops after creation', async () => {
+            await client.authenticate(user);
+
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            await client.logout();
+
             await client.authenticate(student);
+
+            testWorkshop.id = group._id;
 
             const createdWorkshop = await service.create(testWorkshop);
 
@@ -118,6 +129,13 @@ describe.only('\'workshops\' service', () => {
         it('removes from admin workshops after workshop is removed', async () => {
             await client.authenticate(user);
 
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            testWorkshop.id = group._id;
+
             const createdWorkshop = await service.create(testWorkshop);
 
             await service.remove(createdWorkshop.id);
@@ -130,7 +148,18 @@ describe.only('\'workshops\' service', () => {
         });
 
         it('removes from student workshops after workshop is removed', async () => {
+            await client.authenticate(user);
+
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            await client.logout();
+
             await client.authenticate(student);
+
+            testWorkshop.id = group._id;
 
             const createdWorkshop = await service.create(testWorkshop);
 
@@ -146,6 +175,13 @@ describe.only('\'workshops\' service', () => {
         it('does removes workshop not owned by authenticated user', async () => {
             await client.authenticate(user);
 
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            testWorkshop.id = group._id;
+
             const createdWorkshop = await service.create(testWorkshop);
 
             await client.logout();
@@ -160,6 +196,13 @@ describe.only('\'workshops\' service', () => {
         it('does updates workshop not owned by authenticated user', async () => {
             await client.authenticate(user);
 
+            group = await groups.create({
+                name: 'Test',
+                class: 'Test',
+            });
+
+            testWorkshop.id = group._id;
+
             const createdWorkshop = await service.create(testWorkshop);
 
             await client.logout();
@@ -167,6 +210,16 @@ describe.only('\'workshops\' service', () => {
             await client.authenticate(student);
 
             await service.update(createdWorkshop.id, createdWorkshop);
+
+            await client.logout();
+        });
+
+        it('does not create workshop when one already exists', async () => {
+            await client.authenticate(user);
+
+            assert.rejects(async () => {
+                await service.create(workshop);
+            });
 
             await client.logout();
         });
