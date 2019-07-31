@@ -1,3 +1,6 @@
+const { BadRequest } = require('@feathersjs/errors');
+
+
 async function assignToOwner({ params: { user: owner }, app, result, service }) {
     const users = app.service('users');
 
@@ -28,4 +31,16 @@ async function checkXMLChanged(context) {
     return context;
 }
 
-module.exports = { assignToOwner, checkXMLChanged };
+async function checkIfExists(context) {
+    const workshops = await context.app.service('workshops').find({
+        query: { id: context.data.id },
+    });
+
+    if (workshops.length !== 0) {
+        throw new BadRequest('Workshop with entered id already exists');
+    } else {
+        return context;
+    }
+}
+
+module.exports = { assignToOwner, checkIfExists, checkXMLChanged };
