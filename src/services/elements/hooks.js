@@ -11,3 +11,7 @@ async function checkIfExists(context) {
         return context;
     }
 }
+
+module.exports = {
+    checkIfExists
+};
