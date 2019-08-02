@@ -8,6 +8,7 @@ const {
     checkAdminOrOwner,
     checkOldPassword,
     checkOwner,
+    generateColor,
     preventChangesIfNotOwner,
 } = require('./utils.hooks');
 
@@ -17,7 +18,7 @@ module.exports = {
         all: [],
         find: [authenticate('jwt'), checkPermissions({ roles: ['admin'] })],
         get: [authenticate('jwt'), checkAdminOrOwner()],
-        create: [hashPassword()],
+        create: [hashPassword(), generateColor],
         update: [hashPassword(), authenticate('jwt'), checkOwner()],
         patch: [
             hashPassword(), authenticate('jwt'),

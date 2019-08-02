@@ -72,9 +72,26 @@ async function checkOldPassword(context) {
     return context;
 }
 
+function getRandomColor() {
+    return [
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256),
+    ];
+}
+
+function generateColor(context) {
+    if (!context.data.hasOwnProperty('color')) {
+        context.data.color = getRandomColor();
+    }
+
+    return context;
+}
+
 module.exports = {
     checkAdminOrOwner,
     checkOldPassword,
     checkOwner,
+    generateColor,
     preventChangesIfNotOwner,
 };
