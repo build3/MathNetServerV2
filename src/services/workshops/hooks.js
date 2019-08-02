@@ -1,6 +1,5 @@
 const { BadRequest } = require('@feathersjs/errors');
 
-
 async function assignToOwner({ params: { user: owner }, app, result, service }) {
     const users = app.service('users');
 
