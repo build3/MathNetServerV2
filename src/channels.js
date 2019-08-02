@@ -30,8 +30,11 @@ const leaveChannels = (app, user) => {
     app.channel(app.channels).leave((connection) => {
         connection = fixConnection(connection);
 
-        // Connection should be removed when connection is valid and user is assigned to it.
-        return connection && connection.user && user && connection.user.username === user.username
+        try {
+            return connection.user.username === user.username;
+        } catch (error) {
+            return true;
+        }
     });
 };
 
@@ -40,28 +43,35 @@ const leaveChannels = (app, user) => {
  */
 const updateChannels = (app, user) => {
     // Find all connections for this user.
-    const { connections } = app.channel(app.channels).filter(connection =>
-        // This should be only true if user is logged (user has to be defined) and connection is assigned to him.
-        connection.user && user && connection.user.username === user.username
-    );
+    const { connections } = app.channel(app.channels).filter(connection => {
+        connection = fixConnection(connection);
+
+        try {
+            return connection.user.username === user.username;
+        } catch (error) {
+            return false;
+        }
+    });
+
+   // assert(connections.length == 1);
 
     // Leave all channels.
     leaveChannels(app, user);
-
+    
     // Re-join all channels with the updated user information.
     joinChannels(app, user, connections[0]);
 };
 
 function elementCreated(element, context) {
-    log.info('Element created: ', element);
+    log.info('Element created: ', element.name);
 }
 
 function elementModified(element, context) {
-    log.info('Element modified: ', element);
+    log.info('Element modified: ', element.name);
 }
 
 function elementRemoved(element, context) {
-    log.info('Element removed: ', element);
+    log.info('Element removed: ', element.name);
 }
 
 function workshopCreated(workshop, context) {
