@@ -27,7 +27,7 @@ function checkOwner(service, queryParam, userParam) {
                 resources = resources.data;
             }
 
-            if (resources.length && resources[0][userParam] == user.username) {
+            if (resources[0][userParam] == null || (resources.length && resources[0][userParam] == user.username)) {
                 return context;
             } else {
                 throw new NotFound();
@@ -45,7 +45,7 @@ function setOwner(fieldName) {
     return function (context) {
         const { user } = context.params;
 
-        if (user !== undefined) {
+        if (user !== undefined && context.data[fieldName] === undefined) {
             context.data[fieldName] = user.username;
         }
 
