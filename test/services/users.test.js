@@ -115,6 +115,15 @@ describe('users service', () => {
             });
         });
     });
+
+    it('do not create user with underscore in username', async () => {
+        assert.rejects(() => {
+            service.create({
+                username: '_test',
+                password: 'secret',
+            });
+        });
+    });
 });
 
 describe('teacher end to end tests', function () {

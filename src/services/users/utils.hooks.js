@@ -88,10 +88,21 @@ function generateColor(context) {
     return context;
 }
 
+function checkUsername(context) {
+    if (context.data.hasOwnProperty('username')) {
+        if (context.data.username.includes('_')) {
+            throw new BadRequest('Username cannot contain _');
+        }
+    }
+
+    return context;
+}
+
 module.exports = {
     checkAdminOrOwner,
     checkOldPassword,
     checkOwner,
+    checkUsername,
     generateColor,
     preventChangesIfNotOwner,
 };
