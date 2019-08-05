@@ -1,4 +1,4 @@
-const { NotFound } = require('@feathersjs/errors');
+const { BadRequest, NotFound } = require('@feathersjs/errors');
 
 /**
  * Checks if requested user is an owner of the resource.
@@ -11,21 +11,31 @@ function checkOwner(service, queryParam, userParam) {
         const { user } = context.params;
         const resourceId = context.arguments[0];
 
-        const query = { [queryParam]: resourceId };
-
-        var resources = await context.app.service(service).find({ query });
-
-        if (resources.hasOwnProperty('data')) {
-            resources = resources.data;
-        }
-
-        if (resources.length && resources[0][userParam] == user.username) {
-             return context;
+        if (resourceId === null) {
+            // Only admin can change multiple resources.
+            if (user.permissions.indexOf('admin') > -1) {
+                return context
+            } else {
+                throw new BadRequest('Only user with admin permission can change multiple resources at once.');
+            }
         } else {
-            throw new NotFound();
+            const query = { [queryParam]: resourceId };
+
+            var resources = await context.app.service(service).find({ query });
+
+            if (resources.hasOwnProperty('data')) {
+                resources = resources.data;
+            }
+
+            if (resources.length && resources[0][userParam] == user.username) {
+                return context;
+            } else {
+                throw new NotFound();
+            }
         }
     };
 }
+
 
 
 /**

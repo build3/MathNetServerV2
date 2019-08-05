@@ -2,7 +2,7 @@ const createService = require('feathers-memory');
 const hooks = require('./elements.hooks');
 
 module.exports = (app) => {
-    const options = { events: ['xml-changed'] };
+    const options = { events: ['xml-changed'], multi: ['remove'] };
 
     const elements = createService(options);
 
