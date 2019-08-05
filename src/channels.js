@@ -47,7 +47,9 @@ const updateChannels = (app, user) => {
         connection = fixConnection(connection);
 
         try {
-            return connection.user.username === user.username;
+            // Remove connection which do not have Authorization header.
+            return connection.user.username === user.username
+                && connection.headers.hasOwnProperty('Authorization');
         } catch (error) {
             return false;
         }
