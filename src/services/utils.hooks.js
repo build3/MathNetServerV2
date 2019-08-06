@@ -27,7 +27,7 @@ function checkOwner(service, queryParam, userParam) {
                 resources = resources.data;
             }
 
-            if (resources[0][userParam] == null || (resources.length && resources[0][userParam] == user.username)) {
+            if (resources.length && (resources[0][userParam] == null || resources[0][userParam] == user.username)) {
                 return context;
             } else {
                 throw new NotFound();
