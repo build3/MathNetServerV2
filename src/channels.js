@@ -144,6 +144,7 @@ module.exports = (app) => {
             // When logging out, leave all channels and join anonymous channel.
             leaveChannels(app, connection.user);
             app.channel('anonymous').join(connection);
+            log.info('Logout user: ', connection.user.username);
         }
     });
 
@@ -184,7 +185,14 @@ module.exports = (app) => {
         actions.forEach(action => {
             app.service(service).publish(action, (entity, hook) => {
                 return app.channel(`workshops/${getWorkshop(entity)}`)
-                    .filter(connection => connection.user.username !== hook.params.user.username);
+                    .filter(connection => {
+                        if (connection !== undefined) {
+                            return connection.user.username !== hook.params.user.username
+                                && connection.headers.hasOwnProperty('Authorization');
+                        } else {
+                            return false;
+                        }
+                    });
             });
         });
     });
