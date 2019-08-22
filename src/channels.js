@@ -137,13 +137,19 @@ module.exports = (app) => {
         }
     });
 
-    app.on('logout', (payload, { connection }) => {
+    app.on('logout', async (payload, { connection }) => {
         connection = fixConnection(connection);
 
         if (connection && connection.user) {
             // When logging out, leave all channels and join anonymous channel.
             leaveChannels(app, connection.user);
             app.channel('anonymous').join(connection);
+
+            if (connection.user.permissions.includes('student')) {
+                await app.service('users').patch(connection.user.username, {
+                    workshops: [],
+                });
+            }
         }
     });
 
