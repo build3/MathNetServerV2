@@ -17,7 +17,7 @@ const {
 module.exports = {
     before: {
         all: [],
-        find: [authenticate('jwt'), checkPermissions({ roles: ['admin'] })],
+        find: [authenticate('jwt'), checkPermissions({ roles: ['admin', 'student'] })],
         get: [authenticate('jwt'), checkAdminOrOwner()],
         create: [checkUsername, hashPassword(), generateColor],
         update: [hashPassword(), authenticate('jwt'), checkOwner()],
