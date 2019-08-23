@@ -21,6 +21,9 @@ module.exports = (app) => {
         color: {
             type: [Number], required: true,
         },
+        numberInGroup: {
+            type: Number, required: false, default: null,
+        },
     }, {
         timestamps: true,
     });
