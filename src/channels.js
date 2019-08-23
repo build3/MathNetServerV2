@@ -184,7 +184,8 @@ module.exports = (app) => {
         actions.forEach(action => {
             app.service(service).publish(action, (entity, hook) => {
                 return app.channel(`workshops/${getWorkshop(entity)}`)
-                    .filter(connection => connection.user.username !== hook.params.user.username);
+                    .filter(connection => connection.user.username !== hook.params.user.username
+                        || hook.params.user.permissions.includes('admin'));
             });
         });
     });
