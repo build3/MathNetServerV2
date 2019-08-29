@@ -55,13 +55,18 @@ const updateChannels = (app, user) => {
         }
     });
 
-   // assert(connections.length == 1);
+    // assert(connections.length == 1);
 
-    // Leave all channels.
-    leaveChannels(app, user);
-    
-    // Re-join all channels with the updated user information.
-    joinChannels(app, user, connections[0]);
+    // Sometimes (it's rare) connections are empty and then joinChannels
+    // function throws an error and server is killed because there're no
+    // connections to leave and then re-join.
+    if (connections.length === 1) {
+        // Leave all channels.
+        leaveChannels(app, user);
+
+        // Re-join all channels with the updated user information.
+        joinChannels(app, user, connections[0]);
+    }
 };
 
 function elementCreated(element, context) {
