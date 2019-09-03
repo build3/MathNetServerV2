@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 module.exports = (app) => {
     const client = app.get('mongooseClient');
     const { Schema } = client;
@@ -23,6 +25,9 @@ module.exports = (app) => {
         },
         numberInGroup: {
             type: Number, required: false, default: null,
+        },
+        toolbars: {
+            type: [mongoose.Schema.Types.Mixed], required: true,
         },
     }, {
         timestamps: true,
