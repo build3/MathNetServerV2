@@ -19,8 +19,13 @@ async function assignToOwner({ params: { user: owner }, app, result, service }) 
 async function checkXMLChanged(context) {
     const workshop = await context.app.service('workshops').get(context.id);
 
-    if (context.data.hasOwnProperty('xml')) {
-        workshop.xml !== context.data.xml ?
+    if (context.data.hasOwnProperty('xml') || context.data.hasOwnProperty('properties')) {
+        const hasWorkshopChanged = (
+            workshop.xml !== context.data.xml
+            || workshop.properties !== context.data.properties
+        );
+
+        hasWorkshopChanged ?
             context.data.xmlChanged = true :
             context.data.xmlChanged = false;
     } else {
