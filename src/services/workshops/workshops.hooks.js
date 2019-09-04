@@ -1,5 +1,11 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
-const { assignToOwner, checkIfExists, checkXMLChanged } = require('./hooks');
+
+const {
+    assignToOwner,
+    checkIfExists,
+    checkXMLChanged,
+    propertiesFirstChanged,
+} = require('./hooks');
 
 module.exports = {
     before: {
@@ -7,8 +13,8 @@ module.exports = {
         find: [],
         get: [],
         create: [checkIfExists],
-        update: [checkXMLChanged],
-        patch: [checkXMLChanged],
+        update: [checkXMLChanged, propertiesFirstChanged],
+        patch: [checkXMLChanged, propertiesFirstChanged],
         remove: [],
     },
 

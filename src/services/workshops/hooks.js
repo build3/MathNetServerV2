@@ -30,6 +30,24 @@ async function checkXMLChanged(context) {
     return context;
 }
 
+/**
+ * Checks if properties sent by user are different then the one in current workshop.
+ * If value is different set `propertiesFirstUser` parameter to true, otherwise set it to false.
+ */
+async function propertiesFirstChanged(context) {
+    const workshop = await context.app.service('workshops').get(context.id);
+
+    if (context.data.hasOwnProperty('propertiesFirstUser')) {
+        workshop.propertiesFirstUser !== context.data.propertiesFirstUser ?
+            context.data.propertiesFirstChanged = true :
+            context.data.propertiesFirstChanged = false;
+    } else {
+        context.data.propertiesFirstChanged = false;
+    }
+
+    return context;
+}
+
 async function checkIfExists(context) {
     const workshops = await context.app.service('workshops').find({
         query: { id: context.data.id },
@@ -42,4 +60,9 @@ async function checkIfExists(context) {
     }
 }
 
-module.exports = { assignToOwner, checkIfExists, checkXMLChanged };
+module.exports = {
+    assignToOwner,
+    checkIfExists,
+    checkXMLChanged,
+    propertiesFirstChanged,
+};

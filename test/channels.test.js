@@ -426,6 +426,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
     let groups;
     let client2;
     let workshops2;
+    let users2;
 
     before(async () => {
         server = app.listen(port);
@@ -440,6 +441,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
         groups = client.service('groups');
 
         workshops2 = client2.service('workshops');
+        users2 = client2.service('users');
     });
 
     beforeEach(async () => {
@@ -590,7 +592,7 @@ describe.only('Workshop\'s event propagation into channels', () => {
         await workshops.remove(workshopNew.id);
     }).timeout(4000);
 
-    it('does not receives xml-changed when nothing changet', async () => {
+    it('does not receive xml-changed when nothing changed', async () => {
         const group = await groups.create({
             name: 'Test',
             class: 'Test',
@@ -604,5 +606,45 @@ describe.only('Workshop\'s event propagation into channels', () => {
         client.service('workshops').on('xml-changed', () => assert.fail(NOT_BELONG));
 
         await workshops.patch(workshopNew.id, { xml: '<xml />' });
+    });
+
+    it('does receive properties-first-user-changed', async () => {
+        const group = await groups.create({
+            name: 'test',
+            class: 'test',
+        });
+
+        await users2.patch(otherUser.username, { numberInGroup: 1 });
+
+        const workshopNew = await workshops2.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        return new Promise((resolve) => {
+            client2.service('workshops').on('properties-first-user-changed', data => {
+                resolve();
+            });
+
+            workshops2.patch(workshopNew.id, {
+                propertiesFirstUser: 'test',
+            });
+        });
+    });
+
+    it('does not receive properties-first-user-changed', async () => {
+        const group = await groups.create({
+            name: 'test',
+            class: 'test',
+        });
+
+        await users2.patch(otherUser.username, { numberInGroup: 2 });
+
+        await workshops2.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        client.service('workshops').on('properties-first-user-changed', () => assert.fail(NOT_BELONG));
     });
 });
