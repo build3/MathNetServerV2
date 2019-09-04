@@ -2,7 +2,7 @@ const createService = require('feathers-memory');
 const hooks = require('./workshops.hooks');
 
 module.exports = function (app) {
-    const options = { id: 'id', events: ['xml-changed'] };
+    const options = { id: 'id', events: ['xml-changed', 'properties-changed'] };
 
     // Initialize our service with any options it requires
     app.use('/workshops', createService(options));

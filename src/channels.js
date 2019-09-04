@@ -91,6 +91,10 @@ function workshopModified(workshop, context) {
     if (context.data.xmlChanged) {
         context.service.emit('xml-changed', workshop, context);
     }
+
+    if (context.data.propertiesChanged) {
+        context.service.emit('properties-changed', workshop, context);
+    }
 }
 
 async function workshopRemoved(workshop, context) {
@@ -179,7 +183,7 @@ module.exports = (app) => {
         return app.channel('authenticated');
     });
 
-    const actions = ['created', 'updated', 'patched', 'removed', 'xml-changed'];
+    const actions = ['created', 'updated', 'patched', 'removed', 'xml-changed', 'properties-changed'];
     const services = [
         { service: 'workshops', getWorkshop: (workshop => workshop.id) },
         { service: 'elements', getWorkshop: (element => element.workshop) },

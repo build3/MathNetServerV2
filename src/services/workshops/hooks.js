@@ -30,6 +30,20 @@ async function checkXMLChanged(context) {
     return context;
 }
 
+async function checkPropertiesChanged(context) {
+    const workshop = await context.app.service('workshops').get(context.id);
+
+    if (context.data.hasOwnProperty('properties')) {
+        workshop.properties !== context.data.properties ?
+            context.data.propertiesChanged = true :
+            context.data.propertiesChanged = false;
+    } else {
+        context.data.propertiesChanged = false;
+    }
+
+    return context;
+}
+
 async function checkIfExists(context) {
     const workshops = await context.app.service('workshops').find({
         query: { id: context.data.id },
@@ -42,4 +56,9 @@ async function checkIfExists(context) {
     }
 }
 
-module.exports = { assignToOwner, checkIfExists, checkXMLChanged };
+module.exports = {
+    assignToOwner,
+    checkIfExists,
+    checkPropertiesChanged,
+    checkXMLChanged,
+};
