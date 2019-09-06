@@ -91,6 +91,10 @@ function workshopModified(workshop, context) {
     if (context.data.xmlChanged) {
         context.service.emit('xml-changed', workshop, context);
     }
+
+    if (context.data.propertiesChanged) {
+        context.service.emit('properties-first-user-changed', workshop, context);
+    }
 }
 
 async function workshopRemoved(workshop, context) {
@@ -194,4 +198,9 @@ module.exports = (app) => {
             });
         });
     });
+
+    app.service('workshops').publish('properties-first-user-changed', workshop =>
+        app.channel(`workshops/${workshop.id}`)
+            .filter(connection => connection.user.numberInGroup === 1)
+    );
 };
