@@ -67,6 +67,22 @@ async function checkXMLChanged(context) {
     return context;
 }
 
+function checkFirstProperties({ propertiesFirst }, { data }) {
+    return JSON.stringify(propertiesFirst) !== JSON.stringify(data.propertiesFirst);
+}
+
+async function checkPropertiesFirstChanged(context) {
+    const workshop = await context.app.service('workshops').get(context.id);
+
+    if (context.data.hasOwnProperty('propertiesFirst')) {
+        context.data.propertiesChanged = checkFirstProperties(workshop, context);
+    } else {
+        context.data.propertiesChanged = false;
+    }
+
+    return context;
+}
+
 async function checkIfExists(context) {
     const workshops = await context.app.service('workshops').find({
         query: { id: context.data.id },
@@ -79,4 +95,4 @@ async function checkIfExists(context) {
     }
 }
 
-module.exports = { assignToOwner, checkIfExists, checkXMLChanged };
+module.exports = { assignToOwner, checkIfExists, checkXMLChanged, checkPropertiesFirstChanged };
