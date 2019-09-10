@@ -14,5 +14,5 @@ services:
   db:
     image: mongo
     volumes:
-      - ./tmp/db:/data/db
+      - ../database/db:/data/db
 
