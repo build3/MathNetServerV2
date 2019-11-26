@@ -1,4 +1,5 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
+// eslint-disable-next-line no-unused-vars
 const { setOwner, checkOwner } = require('../utils.hooks.js');
 const { checkIfExists } = require('./hooks');
 
@@ -8,9 +9,9 @@ module.exports = {
         find: [],
         get: [],
         create: [checkIfExists, setOwner('owner')],
-        update: [checkOwner('elements', 'id', 'owner')],
-        patch: [checkOwner('elements', 'id', 'owner')],
-        remove: [checkOwner('elements', 'id', 'owner')],
+        update: [], // checkOwner('elements', 'id', 'owner')],
+        patch: [], // checkOwner('elements', 'id', 'owner')],
+        remove: [], // checkOwner('elements', 'id', 'owner')],
     },
 
     after: {
