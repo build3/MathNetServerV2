@@ -13,6 +13,8 @@ services:
       - db
   db:
     image: mongo
+    ports:
+      - "27017:27017"
     volumes:
       - ../database/db:/data/db
 
