@@ -605,4 +605,68 @@ describe.only('Workshop\'s event propagation into channels', () => {
 
         await workshops.patch(workshopNew.id, { xml: '<xml />' });
     });
+
+    it('does receive properties-first-user-changed', async () => {
+        const group = await groups.create({
+            name: 'test',
+            class: 'test',
+        });
+
+        await users2.patch(otherUser.username, { numberInGroup: 1 });
+
+        const workshopNew = await workshops2.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        return new Promise((resolve) => {
+            client2.service('workshops').on('properties-first-user-changed', data => {
+                resolve();
+            });
+
+            workshops2.patch(workshopNew.id, {
+                propertiesFirst: 'test',
+            });
+        });
+    });
+
+    it('does not receive properties-first-user-changed', async () => {
+        const group = await groups.create({
+            name: 'test',
+            class: 'test',
+        });
+
+        await users2.patch(otherUser.username, { numberInGroup: 2 });
+
+        const workshopNew = await workshops2.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        await workshops2.patch(workshopNew.id, {
+            propertiesFirst: 'test',
+        });
+
+        client.service('workshops').on('properties-first-user-changed', () => assert.fail(NOT_BELONG));
+    });
+
+    it('does not receive properties-first-user-changed when no propertyFirst', async () => {
+        const group = await groups.create({
+            name: 'test',
+            class: 'test',
+        });
+
+        await users2.patch(otherUser.username, { numberInGroup: 2 });
+
+        const workshopNew = await workshops2.create({
+            xml: '<xml />',
+            id: group._id,
+        });
+
+        await workshops2.patch(workshopNew.id, {
+            xml: 'test',
+        });
+
+        client.service('workshops').on('properties-first-user-changed', () => assert.fail(NOT_BELONG));
+    });
 });

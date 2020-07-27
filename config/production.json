@@ -1,4 +1,5 @@
 {
-  "host": "mathnet-app.feathersjs.com",
-  "port": "PORT"
+  "host": "mathnet.aws.233analytics.com",
+  "port": "PORT",
+  "mongodb": "mongodb://db:27017/mathnet"
 }

@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 module.exports = (app) => {
     const client = app.get('mongooseClient');
     const { Schema } = client;
@@ -10,6 +12,9 @@ module.exports = (app) => {
         // and exported by GeoGebra applet.
         xml: {
             type: String, required: true,
+        },
+        properties: {
+            type: mongoose.Schema.Types.Mixed, required: false, default: null,
         },
     }, {
         timestamps: true,
