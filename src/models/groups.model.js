@@ -14,6 +14,9 @@ module.exports = (app) => {
         name: {
             type: String, required: false,
         },
+        color: {
+            type: [Number], required: false,
+        },
     }, {
         timestamps: true,
     });
