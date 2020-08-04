@@ -5,6 +5,8 @@ const { filterOwnedBy, setOwner, checkOwner, isAdmin } = require('../utils.hooks
 
 const { setCode } = require('./hooks');
 
+const { reGenerateColor } = require('./regenerate_color.js');
+
 module.exports = {
     before: {
         all: [authenticate('jwt'), checkPermissions({ roles: ['admin', 'student'] })],
@@ -18,7 +20,7 @@ module.exports = {
 
     after: {
         all: [],
-        find: [],
+        find: [reGenerateColor],
         get: [],
         create: [],
         update: [],
