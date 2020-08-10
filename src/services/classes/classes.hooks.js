@@ -6,6 +6,7 @@ const { filterOwnedBy, setOwner, checkOwner, isAdmin } = require('../utils.hooks
 const { setCode } = require('./hooks');
 
 const { setGroupColor } = require('./set_group_color')
+const { reGenerateColor } = require('./regenerate_color.js');
 
 module.exports = {
     before: {
@@ -20,7 +21,7 @@ module.exports = {
 
     after: {
         all: [],
-        find: [],
+        find: [reGenerateColor],
         get: [],
         create: [],
         update: [],
