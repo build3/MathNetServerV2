@@ -11,7 +11,7 @@ async function setGroupColor(context) {
 
     const groupsWithoutColor = await groups.find({
         query: {
-            color: [],
+            color: null,
             teacher: context.params.user.username
         }
     });
